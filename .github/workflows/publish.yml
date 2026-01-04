@@ -30,20 +30,11 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Convert DocC to Typst
-        run: |
-          mkdir -p typst/chapters
-          python scripts/migrate.py
+      - name: Build PDF
+        run: bin/build-pdf
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-
-      - name: Setup Typst
-        uses: typst-community/setup-typst@v3
-        with:
-          typst-version: '0.11.0'
-
-      - name: Build PDF
-        run: typst compile typst/main.typ swift-book.pdf --root .
+          TYPST_PACKAGE_PATH: packages
 
       - name: Create Release
         uses: softprops/action-gh-release@v2

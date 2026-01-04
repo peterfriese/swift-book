@@ -1,0 +1,38 @@
+#! /bin/bash
+
+# This source file is part of the Swift.org open source project
+#
+# Copyright (c) 2024 Apple Inc. and the Swift project authors
+# Licensed under Apache License v2.0 with Runtime Library Exception
+#
+# See https://swift.org/LICENSE.txt for license information
+# See https://swift.org/CONTRIBUTORS.txt for Swift project authors
+
+# Builds the PDF version of The Swift Programming Language using Typst.
+# This script handles the conversion from DocC to Typst and the compilation process.
+
+set -eux
+
+# Start at the top level directory of the repository.
+cd "$(git rev-parse --show-toplevel)"
+
+echo "Starting Swift Book PDF build..."
+
+# 1. Setup Environment
+# Ensure packages directory logic is handled.
+# If running locally, we might rely on the local checkout.
+# If TYPST_PACKAGE_PATH is set, use it. Otherwise default to 'packages'.
+export TYPST_PACKAGE_PATH="${TYPST_PACKAGE_PATH:-$PWD/packages}"
+
+# 2. Migration
+echo "Converting DocC content to Typst..."
+mkdir -p typst/chapters
+python3 scripts/migrate.py
+
+# 3. Compilation
+echo "Compiling PDF..."
+OUTPUT_FILE="${1:-swift-book.pdf}"
+
+typst compile typst/main.typ "$OUTPUT_FILE" --root .
+
+echo "Build complete: $OUTPUT_FILE"
