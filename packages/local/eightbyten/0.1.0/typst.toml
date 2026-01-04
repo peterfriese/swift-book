@@ -1,0 +1,12 @@
+[package]
+name = "eightbyten"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["Peter Friese"]
+description = "A Tufte-style book template using marginalia."
+license = "MIT"
+
+[template]
+path = "template"
+entrypoint = "main.typ"
+thumbnail = "thumbnails/01.png"

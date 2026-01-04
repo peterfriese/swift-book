@@ -1,0 +1,21 @@
+{
+    "Create a constant with": "Explicit Float Constant",
+    "Try removing the conversion to `String` from the last line.": "Remove String Conversion",
+    "Use `\\()` to": "String Interpolation",
+    "Change `optionalName` to `nil`.": "Optional Binding with nil",
+    "Try removing the default case.": "Remove Switch Default",
+    "Replace the `_` with a variable name,": "Switch Variable Binding",
+    "Remove the `day` parameter.": "Function Parameters",
+    "Rewrite the closure to return zero for all odd numbers.": "Closure Logic",
+    "Add a constant property with `let`,": "Class Properties and Methods",
+    "Make another subclass of `NamedShape`": "Circle Subclass",
+    "Write a function that compares two `Rank` values": "Enum Raw Value Comparison",
+    "Add a `color()` method to `Suit` that returns \"black\"": "Enum Method",
+    "Add a third case to `ServerResponse` and to the switch.": "Enum Associated Values",
+    "Write a function that returns an array containing": "Nested Loops Card Deck",
+    "Add another requirement to `ExampleProtocol`.": "Protocol Requirements",
+    "Write an extension for the `Double` type": "Double Extension",
+    "Change the printer name to `\"Never Has Toner\"`,": "Error Handling Trigger",
+    "Add code to throw an error inside the `do` block.": "Catching Errors",
+    "Modify the `anyCommonElements(_:_:)` function": "Generic Intersection"
+}

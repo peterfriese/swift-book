@@ -1,0 +1,56 @@
+name: Publish Book
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TYPST_PACKAGE_PATH: packages
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Calculate Version
+        id: version
+        run: |
+          VERSION=$(git describe --tags --match "swift-*" 2>/dev/null || echo "0.0.0-dev")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Convert DocC to Typst
+        run: |
+          mkdir -p typst/chapters
+          python scripts/migrate.py
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: Setup Typst
+        uses: typst-community/setup-typst@v3
+        with:
+          typst-version: '0.11.0'
+
+      - name: Build PDF
+        run: typst compile typst/main.typ swift-book.pdf --root .
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(env.VERSION, 'swift-')
+        with:
+          files: swift-book.pdf
+          tag_name: ${{ env.VERSION }}
+          name: Swift Book ${{ env.VERSION }}
+          draft: false
+          prerelease: false

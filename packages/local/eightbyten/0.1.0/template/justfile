@@ -1,0 +1,17 @@
+# Justfile for Book Project
+
+# Watch for changes and recompile
+watch:
+    typst watch main.typ
+
+# Build the PDF
+build:
+    typst compile main.typ
+
+# Open the PDF
+open:
+    open main.pdf
+
+# Clean up generated files
+clean:
+    rm -f main.pdf
