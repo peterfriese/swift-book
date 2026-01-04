@@ -3,49 +3,7 @@
 import os
 import re
 
-# Mapping: (Destination Filename, [Source Filenames from TSPL.docc/])
-mapping = [
-    ("01-welcome-to-swift.typ", ["GuidedTour/AboutSwift.md", "GuidedTour/Compatibility.md", "GuidedTour/GuidedTour.md"]),
-    ("02-the-basics.typ", ["LanguageGuide/TheBasics.md"]),
-    ("03-basic-operators.typ", ["LanguageGuide/BasicOperators.md"]),
-    ("04-strings-and-characters.typ", ["LanguageGuide/StringsAndCharacters.md"]),
-    ("05-collection-types.typ", ["LanguageGuide/CollectionTypes.md"]),
-    ("06-control-flow.typ", ["LanguageGuide/ControlFlow.md"]),
-    ("07-functions.typ", ["LanguageGuide/Functions.md"]),
-    ("08-closures.typ", ["LanguageGuide/Closures.md"]),
-    ("09-enumerations.typ", ["LanguageGuide/Enumerations.md"]),
-    ("10-structures-and-classes.typ", ["LanguageGuide/ClassesAndStructures.md"]),
-    ("11-properties.typ", ["LanguageGuide/Properties.md"]),
-    ("12-methods.typ", ["LanguageGuide/Methods.md"]),
-    ("13-subscripts.typ", ["LanguageGuide/Subscripts.md"]),
-    ("14-inheritance.typ", ["LanguageGuide/Inheritance.md"]),
-    ("15-initialization.typ", ["LanguageGuide/Initialization.md"]),
-    ("16-deinitialization.typ", ["LanguageGuide/Deinitialization.md"]),
-    ("17-optional-chaining.typ", ["LanguageGuide/OptionalChaining.md"]),
-    ("18-error-handling.typ", ["LanguageGuide/ErrorHandling.md"]),
-    ("19-concurrency.typ", ["LanguageGuide/Concurrency.md"]),
-    ("20-macros.typ", ["LanguageGuide/Macros.md"]),
-    ("21-type-casting.typ", ["LanguageGuide/TypeCasting.md"]),
-    ("22-nested-types.typ", ["LanguageGuide/NestedTypes.md"]),
-    ("23-extensions.typ", ["LanguageGuide/Extensions.md"]),
-    ("24-protocols.typ", ["LanguageGuide/Protocols.md"]),
-    ("25-generics.typ", ["LanguageGuide/Generics.md"]),
-    ("26-opaque-types.typ", ["LanguageGuide/OpaqueTypes.md"]),
-    ("27-automatic-reference-counting.typ", ["LanguageGuide/AutomaticReferenceCounting.md"]),
-    ("28-memory-safety.typ", ["LanguageGuide/MemorySafety.md"]),
-    ("29-access-control.typ", ["LanguageGuide/AccessControl.md"]),
-    ("30-advanced-operators.typ", ["LanguageGuide/AdvancedOperators.md"]),
-    ("31-about-language-reference.typ", ["ReferenceManual/AboutTheLanguageReference.md"]),
-    ("32-lexical-structure.typ", ["ReferenceManual/LexicalStructure.md"]),
-    ("33-types.typ", ["ReferenceManual/Types.md"]),
-    ("34-expressions.typ", ["ReferenceManual/Expressions.md"]),
-    ("35-statements.typ", ["ReferenceManual/Statements.md"]),
-    ("36-declarations.typ", ["ReferenceManual/Declarations.md"]),
-    ("37-attributes.typ", ["ReferenceManual/Attributes.md"]),
-    ("38-patterns.typ", ["ReferenceManual/Patterns.md"]),
-    ("39-generic-parameters-and-arguments.typ", ["ReferenceManual/GenericParametersAndArguments.md"]),
-    ("40-grammar-summary.typ", ["ReferenceManual/SummaryOfTheGrammar.md"]),
-]
+# Mapping is now determined dynamically from TSPL.docc/The-Swift-Programming-Language.md
 
 SOURCE_BASE = "TSPL.docc"
 DEST_BASE = "generated/chapters"
@@ -72,6 +30,56 @@ except Exception as e:
     EXPERIMENT_LOOKUP = {}
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
+# --- Dynamic Discovery Helpers ---
+
+DOC_CACHE = {}
+
+def find_doc_path(doc_name):
+    """Locates the markdown file for a given reference doc link."""
+    if not DOC_CACHE:
+        print("Indexing source files...")
+        for root, dirs, files in os.walk(SOURCE_BASE):
+            for f in files:
+                if f.endswith(".md"):
+                    # Key is filename without extension
+                    base = os.path.splitext(f)[0]
+                    DOC_CACHE[base] = os.path.join(root, f)
+    
+    return DOC_CACHE.get(doc_name)
+
+def parse_manifest():
+    """Parses The-Swift-Programming-Language.md to determine book structure."""
+    manifest_path = os.path.join(SOURCE_BASE, "The-Swift-Programming-Language.md")
+    structure = [] # List of ('part', title) or ('chapter', doc_name)
+    
+    if not os.path.exists(manifest_path):
+        print(f"Error: Manifest not found at {manifest_path}")
+        return []
+        
+    try:
+        with open(manifest_path, 'r') as f:
+            lines = f.readlines()
+            
+        capturing = False
+        for line in lines:
+            line = line.strip()
+            if line.startswith("## Topics"):
+                capturing = True
+                continue
+            
+            if capturing:
+                if line.startswith("### "):
+                    structure.append(('part', line[4:].strip()))
+                elif line.startswith("- <doc:"):
+                    match = re.match(r'- <doc:([^>]+)>', line)
+                    if match:
+                        structure.append(('chapter', match.group(1)))
+    except Exception as e:
+        print(f"Error parsing manifest: {e}")
+        
+    return structure
+
 
 def generate_eyebrow_with_ai(text):
     if not GEMINI_API_KEY:
@@ -672,38 +680,62 @@ def convert_md_to_typst(text):
 # Wait, `convert_md_to_typst` is called in the loop.
 # I should add the save logic at the VERY END of the script.
 
-for dest_filename, source_files in mapping:
-    full_content = ""
-    for source_file in source_files:
-        source_path = os.path.join(SOURCE_BASE, source_file)
-        if os.path.exists(source_path):
-            with open(source_path, "r") as f:
-                full_content += f.read() + "\n\n"
-        else:
-            print(f"Warning: Source file not found: {source_path}")
-    
-    converted_content = convert_md_to_typst(full_content)
-    
-    # Add import at the top
-    # Import eightbyten template and local utils
-    # Standard header for all generated files
-    imports = '''#import "@local/eightbyten:0.1.0": *
-#import "../../book-layout/utils.typ": grammar-block, experiment, important, deprecated, memo
+# Start Dynamic Migration
+print("Parsing manifest...")
+structure = parse_manifest()
+generated_typst_lines = []
+chapter_count = 0
 
+# Ensure partial import of utils in generated content
+common_imports = '''#import "@local/eightbyten:0.1.0": *
+#import "../../book-layout/utils.typ": grammar-block, experiment, important, deprecated, memo, part
 '''
-    converted_content = imports + converted_content
-    
-    dest_path = os.path.join(DEST_BASE, dest_filename)
-    with open(dest_path, "w") as f:
-        f.write(converted_content)
-    print(f"Converted {dest_filename}")
 
-# Save updated cache
-try:
-    with open("generated/eyebrows.json", "w") as f:
-        json.dump(EYEBROW_LOOKUP, f, indent=4)
-    print("Updated eyebrows.json cache.")
-except Exception as e:
-    print(f"Warning: Could not save eyebrows.json: {e}")
+# We also need a way to pass 'part' function if we use it in book_content.
+# Actually book_content.typ will be included in mainmatter.typ which imports everything.
+# But individual chapters need utils.
 
-print("Migration complete.")
+for item_type, value in structure:
+    if item_type == 'part':
+        print(f"Processing Part: {value}")
+        # Add part heading to book_content.typ
+        # Note: 'part' is defined in utils.typ or logic. 
+        # Typically in Typst book: #part("Title")
+        generated_typst_lines.append(f'#part("{value}")')
+        
+    elif item_type == 'chapter':
+        doc_name = value
+        source_path = find_doc_path(doc_name)
+        if not source_path:
+             print(f"Warning: Source for {doc_name} not found")
+             continue
+        
+        chapter_count += 1
+        dest_filename = f"{chapter_count:02d}-{doc_name.lower()}.typ"
+        dest_path = os.path.join(DEST_BASE, dest_filename)
+        
+        # Read content
+        try:
+            with open(source_path, 'r') as f:
+                 content = f.read()
+        except Exception as e:
+            print(f"Error reading {source_path}: {e}")
+            continue
+        
+        # Convert
+        converted = convert_md_to_typst(content)
+        
+        # Write Chapter File
+        with open(dest_path, 'w') as f:
+             f.write(common_imports + "\n" + converted)
+             
+        generated_typst_lines.append(f'#include "chapters/{dest_filename}"')
+        print(f"Converted {dest_filename}")
+
+# Write book_content.typ
+book_content_path = os.path.join("generated", "book_content.typ")
+with open(book_content_path, "w") as f:
+    f.write('#import "../book-layout/utils.typ": part\n\n')
+    f.write("\n".join(generated_typst_lines))
+
+print(f"Migration complete. Generated {chapter_count} chapters.")
