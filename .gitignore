@@ -1,6 +1,6 @@
 # Generated content
 generated/
-typst/chapters/ # Legacy ignoring, safe to keep for now
+book-layout/chapters/ # Legacy ignoring, safe to keep for now
 
 # Dependencies (Downloaded by build script)
 packages/

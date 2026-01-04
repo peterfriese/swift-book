@@ -688,7 +688,7 @@ for dest_filename, source_files in mapping:
     # Import eightbyten template and local utils
     # Standard header for all generated files
     imports = '''#import "@local/eightbyten:0.1.0": *
-#import "../../typst/utils.typ": grammar-block, experiment, important, deprecated, memo
+#import "../../book-layout/utils.typ": grammar-block, experiment, important, deprecated, memo
 
 '''
     converted_content = imports + converted_content

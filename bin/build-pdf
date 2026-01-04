@@ -67,6 +67,6 @@ bin/migrate-docs
 echo "Compiling PDF..."
 OUTPUT_FILE="${1:-swift-book.pdf}"
 
-typst compile typst/main.typ "$OUTPUT_FILE" --root .
+typst compile book-layout/main.typ "$OUTPUT_FILE" --root .
 
 echo "Build complete: $OUTPUT_FILE"
