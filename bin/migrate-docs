@@ -688,7 +688,7 @@ chapter_count = 0
 
 # Ensure partial import of utils in generated content
 common_imports = '''#import "@local/eightbyten:0.1.0": *
-#import "../../book-layout/utils.typ": grammar-block, experiment, important, deprecated, memo, part
+#import "../../book-layout/utils.typ": grammar-block, experiment, important, deprecated, memo
 '''
 
 # We also need a way to pass 'part' function if we use it in book_content.
@@ -735,7 +735,7 @@ for item_type, value in structure:
 # Write book_content.typ
 book_content_path = os.path.join("generated", "book_content.typ")
 with open(book_content_path, "w") as f:
-    f.write('#import "../book-layout/utils.typ": part\n\n')
+    f.write('#import "@local/eightbyten:0.1.0": part\n\n')
     f.write("\n".join(generated_typst_lines))
 
 print(f"Migration complete. Generated {chapter_count} chapters.")

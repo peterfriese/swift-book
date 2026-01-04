@@ -95,8 +95,4 @@
 }
 
 
-#let part(title) = {
-  pagebreak(weak: true)
-  counter("part").step()
-  [#heading(level: 1, numbering: none, outlined: true, title) <part>]
-}
+
