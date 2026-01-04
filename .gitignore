@@ -2,6 +2,9 @@
 generated/
 typst/chapters/ # Legacy ignoring, safe to keep for now
 
+# Dependencies (Downloaded by build script)
+packages/
+
 # OS Metadata
 .DS_Store
 

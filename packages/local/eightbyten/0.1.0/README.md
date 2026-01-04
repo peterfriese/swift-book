@@ -14,6 +14,17 @@
 - **Configurable Design**: Easily customize page size, fonts, and sizes.
 - **Index Generation**: Integrated index support via `in-dexter`.
 
+
+## Showcase
+
+Here is a glimpse of what you can create with **EightByTen**:
+
+| | |
+|:---:|:---:|
+| ![Title Page](thumbnails/01.png) | ![Table of Contents](thumbnails/03.png) |
+| ![Chapter Start](thumbnails/06.png) | ![Text & Sidenotes](thumbnails/07.png) |
+| ![Code Blocks](thumbnails/19.png) | ![Wide Blocks](thumbnails/27.png) |
+
 ## Getting Started
 
 ### Local Installation (Recommended)
@@ -110,6 +121,12 @@ And inside your chapter file (e.g., `chapters/01-basics.typ`), start with `#chap
 Here is the content of the chapter...
 ```
 
+You can also add an "eyebrow" above the chapter title:
+
+```typ
+#chapter("Typography", eyebrow: "Design Principles")
+```
+
 ### Marginalia
 
 Add notes to the margin using `note()` or implicit placement (Tufte-style):
@@ -151,6 +168,15 @@ fn main() {
 
 To disable `codly` support, set `codly-support: false` in the configuration.
 
+### Custom Blocks
+
+The package includes several semantic blocks:
+
+- **Snippet**: Use `#snippet(filename: "...", info: "...")` for file listings.
+- **Blockquote**: Use `#blockquote(attribution: "...")` for epigraphs or quotes.
+- **Design Note**: Use `#design-note("Title")` to mark design decisions (can be listed with `#list-of-design-notes`).
+- **Challenges**: Use `#challenges()` to mark exercise sections (can be listed with `#list-of-challenges`).
+
 ## Configuration
 
 The `eightbyten` function accepts several configuration parameters:
@@ -161,6 +187,9 @@ The `eightbyten` function accepts several configuration parameters:
 | `authors`       | `array`   | `()`                | List of authors. |
 | `publisher`     | `string`  | `"..."`             | Publisher name. |
 | `isbn`          | `string`  | `"..."`             | ISBN text. |
+| `book`          | `bool`    | `true`              | Format as a book (vs article). |
+| `repository`    | `string`  | `none`              | URL to the source repository. |
+| `printer-info`  | `string`  | `none`              | Text for printer info colophon. |
 | `paper`         | `string`  | `"8in x 10in"`      | Page size (e.g., "a4", "us-letter" or none for default). |
 | `fonts`         | `dict`    | `default-fonts`     | Setup for `serif`, `sans`, and `mono`. |
 | `debug`         | `bool`    | `false`             | Show debug frames for layout. |
@@ -180,6 +209,15 @@ You can provide your own font family names:
   // ...
 )
 ```
+
+## AI Agent Support
+
+This template is **AI-Agent Ready**. It includes built-in instructions for AI coding assistants (like Google Gemini, Antigravity, Cursor, Windsurf, or GitHub Copilot) to help them understand the project structure and Tufte-style conventions.
+
+- **`AGENTS.md`**: Contains a comprehensive guide for AI agents on how to write content, structure the document, and use the package's features.
+- **`GEMINI.md`**: Examples or specific prompts for Google Gemini (if applicable).
+
+To use this with your AI assistant, simply reference `template/AGENTS.md` in your prompt or context.
 
 ## Contributing
 

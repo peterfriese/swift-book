@@ -22,14 +22,20 @@ In `main.typ`, the `#show: eightbyten.with(...)` rule controls the document sett
   authors: ("Jane Doe",),
   publisher: "Tech Press",
   isbn: "978-0-000-00000-0",
+  book: true,
+  
   // Design settings
   paper: "8in x 10in", // or "us-letter", "a4"
   fonts: (
-    serif: "Linux Libertine",
-    sans: "Inter",
-    mono: "Fira Code"
+    serif: "IBM Plex Serif",
+    sans: "IBM Plex Sans",
+    mono: "IBM Plex Mono"
   ),
-  debug: false // Set to true to see layout frames
+  debug: false, // Set to true to see layout frames
+
+  // Metadata
+  repository: "https://github.com/your-username/your-repo",
+  printer-info: "Printed in the Void."
 )
 ```
 
@@ -64,6 +70,13 @@ Use standard Typst headings.
 
 = Section Header
 == Subsection
+```
+
+**Chapter with Eyebrow:**
+You can add an "eyebrow" (superscript-like title) above the main chapter title:
+
+```typ
+#chapter("Typography", eyebrow: "Design Principles")
 ```
 
 ### Marginalia
@@ -103,6 +116,35 @@ fn main() {
 }
 ```
 ````
+
+
+**Custom Blocks:**
+
+- **Snippet**: A file-like block with a filename and optional info.
+  ```typ
+  #snippet(filename: "main.rs", info: "The entry point")[
+    ... code ...
+  ]
+  ```
+
+- **Blockquote**: A styled quote with optional attribution.
+  ```typ
+  #blockquote(attribution: "Author")[
+    This is a profound quote.
+  ]
+  ```
+
+- **Design Note**: A tracked note for design decisions (generates a list).
+  ```typ
+  #design-note("Color Palette")
+  We chose blue because...
+  ```
+
+- **Challenges**: A tracked challenge block (generates a list).
+  ```typ
+  #challenges()
+  1. First challenge...
+  ```
 
 ## Compilation
 

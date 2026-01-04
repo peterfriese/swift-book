@@ -1,0 +1,709 @@
+#!/usr/bin/env python3
+
+import os
+import re
+
+# Mapping: (Destination Filename, [Source Filenames from TSPL.docc/])
+mapping = [
+    ("01-welcome-to-swift.typ", ["GuidedTour/AboutSwift.md", "GuidedTour/Compatibility.md", "GuidedTour/GuidedTour.md"]),
+    ("02-the-basics.typ", ["LanguageGuide/TheBasics.md"]),
+    ("03-basic-operators.typ", ["LanguageGuide/BasicOperators.md"]),
+    ("04-strings-and-characters.typ", ["LanguageGuide/StringsAndCharacters.md"]),
+    ("05-collection-types.typ", ["LanguageGuide/CollectionTypes.md"]),
+    ("06-control-flow.typ", ["LanguageGuide/ControlFlow.md"]),
+    ("07-functions.typ", ["LanguageGuide/Functions.md"]),
+    ("08-closures.typ", ["LanguageGuide/Closures.md"]),
+    ("09-enumerations.typ", ["LanguageGuide/Enumerations.md"]),
+    ("10-structures-and-classes.typ", ["LanguageGuide/ClassesAndStructures.md"]),
+    ("11-properties.typ", ["LanguageGuide/Properties.md"]),
+    ("12-methods.typ", ["LanguageGuide/Methods.md"]),
+    ("13-subscripts.typ", ["LanguageGuide/Subscripts.md"]),
+    ("14-inheritance.typ", ["LanguageGuide/Inheritance.md"]),
+    ("15-initialization.typ", ["LanguageGuide/Initialization.md"]),
+    ("16-deinitialization.typ", ["LanguageGuide/Deinitialization.md"]),
+    ("17-optional-chaining.typ", ["LanguageGuide/OptionalChaining.md"]),
+    ("18-error-handling.typ", ["LanguageGuide/ErrorHandling.md"]),
+    ("19-concurrency.typ", ["LanguageGuide/Concurrency.md"]),
+    ("20-macros.typ", ["LanguageGuide/Macros.md"]),
+    ("21-type-casting.typ", ["LanguageGuide/TypeCasting.md"]),
+    ("22-nested-types.typ", ["LanguageGuide/NestedTypes.md"]),
+    ("23-extensions.typ", ["LanguageGuide/Extensions.md"]),
+    ("24-protocols.typ", ["LanguageGuide/Protocols.md"]),
+    ("25-generics.typ", ["LanguageGuide/Generics.md"]),
+    ("26-opaque-types.typ", ["LanguageGuide/OpaqueTypes.md"]),
+    ("27-automatic-reference-counting.typ", ["LanguageGuide/AutomaticReferenceCounting.md"]),
+    ("28-memory-safety.typ", ["LanguageGuide/MemorySafety.md"]),
+    ("29-access-control.typ", ["LanguageGuide/AccessControl.md"]),
+    ("30-advanced-operators.typ", ["LanguageGuide/AdvancedOperators.md"]),
+    ("31-about-language-reference.typ", ["ReferenceManual/AboutTheLanguageReference.md"]),
+    ("32-lexical-structure.typ", ["ReferenceManual/LexicalStructure.md"]),
+    ("33-types.typ", ["ReferenceManual/Types.md"]),
+    ("34-expressions.typ", ["ReferenceManual/Expressions.md"]),
+    ("35-statements.typ", ["ReferenceManual/Statements.md"]),
+    ("36-declarations.typ", ["ReferenceManual/Declarations.md"]),
+    ("37-attributes.typ", ["ReferenceManual/Attributes.md"]),
+    ("38-patterns.typ", ["ReferenceManual/Patterns.md"]),
+    ("39-generic-parameters-and-arguments.typ", ["ReferenceManual/GenericParametersAndArguments.md"]),
+    ("40-grammar-summary.typ", ["ReferenceManual/SummaryOfTheGrammar.md"]),
+]
+
+SOURCE_BASE = "TSPL.docc"
+DEST_BASE = "generated/chapters"
+
+import json
+import urllib.request
+import urllib.error
+import os
+
+# Logic to load eyebrows.json
+try:
+    with open("generated/eyebrows.json", "r") as f:
+        EYEBROW_LOOKUP = json.load(f)
+except Exception as e:
+    print(f"Warning: Could not load eyebrows.json: {e}")
+    EYEBROW_LOOKUP = {}
+
+# Logic to load experiments.json
+try:
+    with open("generated/experiments.json", "r") as f:
+        EXPERIMENT_LOOKUP = json.load(f)
+except Exception as e:
+    print(f"Warning: Could not load experiments.json: {e}")
+    EXPERIMENT_LOOKUP = {}
+
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
+def generate_eyebrow_with_ai(text):
+    if not GEMINI_API_KEY:
+        return None
+    
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
+    headers = {'Content-Type': 'application/json'}
+    
+    prompt = f"Summarize the following chapter introduction into a very short, punchy eyebrow (max 5 words). Do not end with a period. Return only the text.\n\nText: {text}"
+    
+    data = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }]
+    }
+    
+    try:
+        req = urllib.request.Request(url, data=json.dumps(data).encode('utf-8'), headers=headers)
+        with urllib.request.urlopen(req) as response:
+            result = json.loads(response.read().decode('utf-8'))
+            candidates = result.get('candidates', [])
+            if candidates:
+                content = candidates[0].get('content', {})
+                parts = content.get('parts', [])
+                if parts:
+                    return parts[0].get('text', '').strip()
+    except Exception as e:
+        print(f"AI Generation Failed: {e}")
+        return None
+    return None
+
+def get_smart_eyebrow(text, title=None):
+    # Method 1: Check Cache
+    if title and title in EYEBROW_LOOKUP:
+        return EYEBROW_LOOKUP[title]
+
+    # Method 2: AI Generation (if key present)
+    if GEMINI_API_KEY and text:
+        print(f"Generating AI eyebrow for: {title}")
+        ai_summary = generate_eyebrow_with_ai(text)
+        if ai_summary:
+            if title:
+                EYEBROW_LOOKUP[title] = ai_summary
+            return ai_summary
+
+    # Method 3: Heuristic / Truncation
+    # If text is short, keep it all
+    if len(text) < 160:
+        return text
+    
+    # Heuristic: Split into sentences
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    if sentences:
+        return sentences[0]
+
+    return text
+
+def convert_md_to_typst(text):
+    # Global cleanup
+    # Normalize newlines
+    text = text.replace('\r\n', '\n').replace('\r', '\n')
+    
+    # Remove HTML comments (multiline) - use [\s\S] for robustness
+    text = re.sub(r'<!--[\s\S]*?-->', '', text)
+    text = re.sub(r'<rdar://[^>]+>', '', text)
+    text = re.sub(r'<doc:([^>]+)>', r'\1', text)
+    text = re.sub(r'<#([^#>]+)#>', r'\1', text)
+
+    lines = text.split('\n')
+    new_lines = []
+    current_fence_length = 0
+    in_blockquote = False
+    is_grammar_block = False
+    grammar_has_content = False
+    
+    pending_code_lines = None
+    delayed_code_lines = None
+    pending_blanks = []
+    
+    expecting_eyebrow = False
+    pending_chapter_title = None
+
+    grammar_has_content = False
+    
+    in_table = False
+    table_rows = []
+
+    for i, line in enumerate(lines):
+        extra_args = ""
+        # Strip trailing whitespace (including \r if any slipped through)
+        line = line.rstrip()
+        stripped = line.lstrip()
+        
+        # Check for fence
+        match = re.match(r'^(`{3,})', stripped)
+        fence_found = match.group(1) if match else None
+        
+        if current_fence_length > 0:
+            # We are inside a block
+            # Check if this line is a closing fence
+            if fence_found and len(fence_found) >= current_fence_length:
+                # Close block
+                current_fence_length = 0
+                if pending_code_lines is not None:
+                     pending_code_lines.append("```")
+                     # Code block captured completely. Do NOT append to new_lines yet.
+                else:
+                     new_lines.append("```") # Should not happen if logic matches
+            else:
+                # Content inside block
+                if pending_code_lines is not None:
+                    pending_code_lines.append(line)
+                else:
+                    new_lines.append(line)
+            continue
+        else:
+            # We are outside a block
+            if fence_found:
+                # Open block
+                if pending_chapter_title:
+                     new_lines.append(f"= {pending_chapter_title}")
+                     pending_chapter_title = None
+                
+                expecting_eyebrow = False
+                current_fence_length = len(fence_found)
+                
+                # Check for language identifier
+                # The stripped line starts with the fence.
+                # Format: ```swift or ``` swift
+                remainder = stripped[len(fence_found):].strip()
+                
+                language = ""
+                if remainder:
+                    language = remainder
+                else:
+                    # Default to swift if no language specified?
+                    # The user asked: "make sure they are marked as Swift (if they are Swift code)"
+                    # Most code in this book is Swift.
+                    # Let's default to swift.
+                    language = "swift"
+                
+                # Start capturing
+                pending_code_lines = []
+                pending_code_lines.append(f"```{language}") 
+                continue
+                
+        # Normal Text Processing (Outside Block)
+
+        # Move regex processing to a function or do it on 'line' variable before decision?
+        # The issue is we strip structure (fences, blockquotes) then process content.
+        # But fences are structure. Blockquotes are structure wrapping content.
+        # So we should decide structure first, then process content of the line.
+        
+        # Buffer logic for outside block content
+        # If we have a pending code block, we need to decide what to do based on current line.
+        if pending_code_lines is not None:
+            is_blank = (line.strip() == "")
+            is_admonition_start = False
+            
+            # Check for admonition start (dup logic from below essentially)
+            if line.strip().startswith(">"):
+                is_admonition_start = True
+            
+            if is_blank:
+                pending_blanks.append(line)
+                continue
+
+            if is_admonition_start:
+                # SWAP DETECTED!
+                # We found an admonition immediately following a code block (and optional blanks).
+                # We delay the code block output until AFTER the admonition closes.
+                delayed_code_lines = pending_code_lines
+                pending_code_lines = None
+                pending_blanks = [] # Discard blanks to align tightly
+                
+                # IMPORTANT: Since we are putting the note BEFORE the code block,
+                # and the code block has internal top inset/padding (processed by raw/codly),
+                # the note (which has 0 top inset) will appear higher than the first line of code.
+                # Use the new 'dy' parameter to push the note down to align with the code text.
+                # Default is now 18pt in utils.typ, so no extra arg needed.
+                extra_args = ''
+                
+                # Fall through to process the admonition current line
+            else:
+                extra_args = ""
+                # Not generic blank, not admonition. 
+                # Flush pending code block first.
+                new_lines.extend(pending_code_lines)
+                new_lines.extend(pending_blanks)
+                pending_code_lines = None
+                pending_blanks = []
+                # Fall through to process current line
+
+        is_blockquote_line = line.strip().startswith(">")
+        
+        if is_blockquote_line:
+            if pending_chapter_title:
+                 new_lines.append(f"= {pending_chapter_title}")
+                 pending_chapter_title = None
+
+            expecting_eyebrow = False
+            content = line.strip()[1:].strip()
+            
+            if not in_blockquote:
+                # Check if this is a Grammar block
+                # Tufte/AGENTS.md doesn't specify a grammar block, but #note is too small.
+                # Let's use a wideblock or just a styled block in the body.
+                # Since we don't have a specific grammar function, let's use a generic rect or block.
+                # We'll identify it by "Grammar of" prefix.
+                if content.startswith("Grammar of"):
+                     # Extract title (first line) and body (rest)
+                     parts = content.split('\n', 1)
+                     title = parts[0].strip()
+                     if title.endswith(':'):
+                         title = title[:-1]
+                     
+                     # Check if there is a body. If the split returned 1 element, it might be just title?
+                     # Usually grammar blocks have content.
+                     if len(parts) > 1:
+                        # Append the opening tag with title
+                        new_lines.append(f'#grammar-block(title: "{title}")[')
+                        is_grammar_block = True
+                        grammar_has_content = False
+                        in_blockquote = True
+                        # We should skip appending the current 'line' (which contains the title) 
+                        continue
+                     else:
+                        is_grammar_block = True
+                        grammar_has_content = False
+                        in_blockquote = True
+                        new_lines.append(f'#grammar-block(title: "{title}")[')
+                        continue
+                else:
+                     # Check for specific admonition prefixes
+                     # Prefixes: Note:, Experiment:, Important:, Deprecated:
+                     # We want to strip the prefix and use the specific function.
+                     
+                     # Map of prefix -> function name
+                     admonitions = {
+                         "Experiment:": "experiment",
+                         "Important:": "important",
+                         "Deprecated:": "deprecated",
+                         "Note:": "memo" 
+                     }
+                     
+                     matched_func = "note" # Default fallback
+                     processed_content = content
+                     
+                     for prefix, func_name in admonitions.items():
+                         if content.startswith(prefix) or content.startswith(f"\\> {prefix}"):
+                             # Handle the case where it might be escaped like '\> Note:'
+                             clean_content = content
+                             if clean_content.startswith("\\> "):
+                                 clean_content = clean_content[3:]
+                             
+                             if clean_content.startswith(prefix):
+                                 matched_func = func_name
+                                 # Strip prefix and potential following space
+                                 processed_content = clean_content[len(prefix):].strip()
+                                 break
+                     
+                     # Check if extra_args is defined (it might not be if we didn't go through the swap logic)
+                     # We need to initialize extra_args for the non-swap path too?
+                     # The variable 'extra_args' is local to the block above?
+                     # No, variables in Python function scope are function-scoped, but here we are in a loop.
+                     # Wait, 'extra_args' was set in the 'if pending_code_lines' block.
+                     # If that block wasn't entered (pending_code_lines is None), 'extra_args' might be undefined or stale!
+                     # We must initialize it at start of loop or handle scope correctly.
+                     
+                     # Better approach: Initialize extra_args = "" at start of loop iteration.
+                     # But we are already deep in. Let's rely on initialization at top of loop.
+                     
+                     # We need to modify the loop start to init extra_args.
+                     # For now, let's use a safe get or rely on the fact we need to init it.
+                     pass 
+                     
+                     if matched_func != "note":
+                         if matched_func == "experiment":
+                              # Lookup short title for caption using full content as key
+                              caption = EXPERIMENT_LOOKUP.get(processed_content, "Experiment")
+                              safe_caption = caption.replace('"', '\\"')
+                              new_lines.append(f'#{matched_func}(caption: "{safe_caption}")[')
+                              
+                              # Strip the "Experiment:" prefix from the body content
+                              if processed_content.startswith("Experiment:"):
+                                  processed_content = processed_content[11:].strip()
+                         else:
+                              new_lines.append(f"#{matched_func}({extra_args})[")
+                         
+                         content = processed_content
+                         is_grammar_block = False
+                         in_blockquote = True
+                         line = content
+                         # continue removed to allow fall-through content addition
+                     is_grammar_block = False
+                in_blockquote = True
+                line = content
+        else:
+            # Not starting with '>'
+            
+            # Markdown Table Detection
+            if line.startswith('|'):
+                if not in_table:
+                    in_table = True
+                    table_rows = []
+                table_rows.append(line)
+                line = "" # Suppress output
+                content = ""
+            
+            else:
+                if in_table:
+                    # End of table detected
+                    in_table = False
+                    
+                    if len(table_rows) >= 3:
+                        header_row = [c.strip() for c in table_rows[0].strip().split('|') if c.strip()]
+                        body_rows = []
+                        for r in table_rows[2:]:
+                             cols = [c.strip() for c in r.strip().split('|') if c.strip()]
+                             body_rows.extend(cols)
+                        
+                        num_cols = len(header_row)
+                        
+                        tbl = f'#table(\n  columns: {num_cols},\n'
+                        for h in header_row:
+                            tbl += f'  [* {h} *],\n'
+                        for b in body_rows:
+                            tbl += f'  [{b}],\n'
+                        tbl += ')\n'
+                        new_lines.append(tbl)
+                    else:
+                        for r in table_rows:
+                            new_lines.append(r)
+                    table_rows = []
+
+                # Image Logic
+                def img_repl(match):
+                    alt = match.group(1)
+                    src = match.group(2)
+                    if not src.lower().endswith(('.png', '.jpg', '.svg', '.jpeg')):
+                        src += "@2x.png"
+                    
+                    if alt:
+                        return f'#figure(image("/TSPL.docc/Assets/{src}"), caption: "{alt}")'
+                    else:
+                        return f'#image("/TSPL.docc/Assets/{src}")'
+                
+                line = re.sub(r'!\[(.*?)\]\((.*?)\)', img_repl, line)
+                content = line
+                if line.strip().startswith("#figure") or line.strip().startswith("#image"):
+                    new_lines.append(line)
+                    expecting_eyebrow = False
+                    continue
+
+                if in_blockquote:
+                    new_lines.append("]")
+                    in_blockquote = False
+                    
+                    # Check directly if we have delayed code block to flush
+                    if delayed_code_lines is not None:
+                         new_lines.extend(delayed_code_lines)
+                         delayed_code_lines = None
+
+        if is_grammar_block:
+             if not grammar_has_content:
+                 if content == "":
+                     # Skip leading empty lines in grammar block
+                     continue
+                 else:
+                     grammar_has_content = True
+        line = content
+        
+        # Now 'line' is the content to be processed (stripped of >)
+        # But wait, success of 'continue' in previous Blockquote step prevents falling through.
+        # We should NOT continue if it was a blockquote line, but let it fall through.
+        # However, we must ensure we don't double process headings if blockquote had heading syntax (unlikely).
+        
+        # Block handling (Fence) was done before this.
+        # So if we are here we are outside code block.
+        
+        # If we just stripped '>', we still want to apply bold/italic/code replacements.
+        
+        # Standard Text Processing
+        
+        # Headings (only if NOT in blockquote for safety? Typst layout might break if heading inside note?)
+        # Let's assume no headings in notes.
+        if not in_blockquote:
+            if line.startswith("# "):
+                # Buffer the title to see if next text is eyebrow
+                if pending_chapter_title:
+                     # Previous title wasn't flushed? Flush it.
+                     new_lines.append(f"= {pending_chapter_title}")
+                pending_chapter_title = line[2:].strip()
+                expecting_eyebrow = True
+                continue
+            if line.startswith("## "):
+                if pending_chapter_title:
+                     new_lines.append(f"= {pending_chapter_title}")
+                     pending_chapter_title = None
+                new_lines.append("== " + line[3:])
+                expecting_eyebrow = False
+                continue
+            if line.startswith("### "):
+                if pending_chapter_title:
+                     new_lines.append(f"= {pending_chapter_title}")
+                     pending_chapter_title = None
+                new_lines.append("=== " + line[4:])
+                expecting_eyebrow = False
+                continue
+            if line.startswith("#### "):
+                if pending_chapter_title:
+                     new_lines.append(f"= {pending_chapter_title}")
+                     pending_chapter_title = None
+                new_lines.append("==== " + line[5:])
+                expecting_eyebrow = False
+                continue
+
+        # Lists (Ordered)
+        if re.match(r'^\d+\.\s', line):
+            if pending_chapter_title:
+                 new_lines.append(f"= {pending_chapter_title}")
+                 pending_chapter_title = None
+            line = re.sub(r'^\d+\.\s', '+ ', line)
+            expecting_eyebrow = False
+            
+        # Stash Inline Code (to prevent escaping special chars inside)
+        code_stash = {}
+        def stash_code(match):
+            content = match.group(0)
+            # Fix for backticks inside inline code (e.g. `` ` ``)
+            # If content is ` ` ` (space backtick space) or similar backtick-only content
+            # We replace it with #raw(" ` ") to be safe
+            stripped_content = content.replace("`", "").strip()
+            # Wait, content includes delimiters.
+            # Example: `` ` ``
+            # We want to detect if the inner text contains backticks.
+            # But we only have match.group(0).
+            # Let's count backticks in the whole string vs delimiters.
+            # Simpler: if the string matches `` ` `` exactly (with spaces)
+            if content == "`` ` ``":
+                content = '#raw(" ` ")'
+            elif content == "`` `": # Edge case
+                 content = '#raw("`")'
+            
+            key = f"JJCODESTASH{len(code_stash)}JJ"
+            code_stash[key] = content
+            return key
+
+        # Handle double backticks first, then single
+        line = re.sub(r'(``+).*?\1', stash_code, line)
+        line = re.sub(r'(`).*?\1', stash_code, line)
+
+        # Tokenize Markdown Bold/Italic delimiters
+        # We process content inside, so just protect delimiters
+        line = re.sub(r'\*\*(.*?)\*\*', r'JJBOLDJJ\1JJBOLDJJ', line)
+        line = re.sub(r'(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)', r'JJITALICJJ\1JJITALICJJ', line)
+        
+        # Escape Typst special characters
+        line = line.replace('_', r'\_')
+        line = line.replace('$', r'\$')
+
+        line = line.replace('#', r'\#')
+        line = line.replace('{', r'\{')
+        line = line.replace('}', r'\}')
+        line = line.replace('@', r'\@')
+        # Escape stray asterisks (those not tokenized as bold/italic)
+        line = line.replace('*', r'\*')
+        
+        # Restore Tokens
+        line = line.replace('JJBOLDJJ', '*')
+        line = line.replace('JJITALICJJ', '_')
+        
+        # Restore Stashed Code
+        for key, value in code_stash.items():
+            line = line.replace(key, value)
+        
+        # Links: [text](url) -> #link("url")[text]
+        line = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'#link("\2")[\1]', line)
+
+        # Reference Style Links Definitions [label]: url -> Remove
+        if re.match(r'^\s*\[[^\]]+\]:\s+.*$', line):
+            # Skip this line entirely (replace with empty)
+            new_lines.append("") 
+            continue
+
+        # Reference Style Links [text][label] -> text
+        line = re.sub(r'\[([^\]]+)\]\[[^\]]*\]', r'\1', line)
+        # Shortcut Reference Links [label] -> label (if not [text](url)) - handled by above if empty label?
+        # Actually [label] might be just text.
+        
+        # Images: !#link("path")[alt] -> #image("path")
+        # We need to find the actual file in Assets/
+        def resolve_image(match):
+            path = match.group(1)
+            # Check if path exists in Assets
+            asset_dir = "TSPL.docc/Assets"
+            if os.path.exists(os.path.join(asset_dir, path)):
+                return f'#image("/TSPL.docc/Assets/{path}")'
+            # Try extensions
+            for ext in ['.png', '.jpg', '.jpeg', '.svg']:
+                if os.path.exists(os.path.join(asset_dir, path + ext)):
+                    return f'#image("/TSPL.docc/Assets/{path + ext}")'
+            # If not found, use placeholder text or comment
+            return f'// Missing image: {path}'
+
+        line = re.sub(r'!#link\("([^"]+)"\)\[([^\]]*)\]', resolve_image, line)
+
+        # Eyebrow Check
+        if expecting_eyebrow:
+            if line.strip() != "":
+                # Found content!
+                # Is it suitable? 
+                # If it starts with a list marker or image or other structure, we cancel.
+                if line.strip().startswith("#image"):
+                     if pending_chapter_title:
+                         new_lines.append(f"= {pending_chapter_title}")
+                         pending_chapter_title = None
+                     expecting_eyebrow = False
+                elif line.strip().startswith("+ ") or line.strip().startswith("- ") or line.strip().startswith("* "):
+                     if pending_chapter_title:
+                         new_lines.append(f"= {pending_chapter_title}")
+                         pending_chapter_title = None
+                     expecting_eyebrow = False
+                else:
+                     # It's text! This is our eyebrow.
+                     # We combine it with the pending chapter title.
+                     if pending_chapter_title:
+                         # Escape quotes in title and eyebrow line to be safe
+                         safe_title = pending_chapter_title.replace('"', '\\"')
+                         # line might already have escapes from earlier processing, be careful.
+                         # But Typst string syntax "..." requires escaping ".
+                         # Our processing escaped specific chars like #, but not " (unless in code stash).
+                         # Let's escape " in the eyebrow content just to be sure if we are wrapping it in string.
+                         
+                         short_eyebrow = get_smart_eyebrow(line, title=pending_chapter_title)
+                         safe_eyebrow = short_eyebrow.replace('"', '\\"')
+                         
+                         new_lines.append(f'#chapter("{safe_title}", eyebrow: "{safe_eyebrow}")')
+                         pending_chapter_title = None
+                     else:
+                         # Should not happen if expecting_eyebrow is True only after H1
+                         # But if logic drifted:
+                         # Just output line wrapped in old function or normal text?
+                         # The old logic used #chapter-eyebrow[]. The new logic requires title.
+                         # Fallback for safety:
+                         new_lines.append(line)
+                     
+                     expecting_eyebrow = False # Only apply to first paragraph
+                     continue # Skip appending 'line' separately
+
+        # If we had a pending title but didn't find an eyebrow (e.g. blank line loop, or cancelled above)
+        # We need to make sure we don't lose the title if we fall through here.
+        # But wait, we only fall through here if valid text line (handled above) or blank line.
+        # Blank lines just append. We shouldn't flush title on blank line, we wait for content.
+        # But if we reach EOF?
+        
+        # If we cancelled expect_eyebrow above (image/list), we flushed title.
+        # So here, if expecting_eyebrow is True, meaning we are looking for text.
+        # If we are here, we are appending 'line'.
+        # If 'line' is empty, we just append it and keep expecting.
+        
+        if pending_chapter_title and line.strip() != "" and not expecting_eyebrow:
+             # This means we had a title, expecting_eyebrow was False (so not H1 path?),
+             # No, if expecting_eyebrow was True, we handled it above.
+             # If expecting_eyebrow was False (e.g. cancelled), title might have been flushed already.
+             # Double check:
+             # cancel -> flush -> set False.
+             pass
+
+        new_lines.append(line)
+    
+    # Safety: Close code block if open
+    if current_fence_length > 0:
+        new_lines.append("`" * current_fence_length)
+        
+    # Safety: Close blockquote if open
+    if in_blockquote:
+        new_lines.append("]")
+        
+    # Safety: Flush any delayed code block (if we ended inside a blockquote)
+    if delayed_code_lines is not None:
+         new_lines.extend(delayed_code_lines)
+
+    # Safety: Flush any pending code block (if we ended with one)
+    if pending_code_lines is not None:
+         # If we have pending blanks, we might want to include them but probably not at EOF
+         new_lines.extend(pending_code_lines)
+
+    # Safety: Flush any pending chapter title
+    if pending_chapter_title:
+         new_lines.append(f"= {pending_chapter_title}")
+
+    return "\n".join(new_lines)
+
+# ... (main loop starts below, no change needed there) ...
+# But we need to save the JSON after the loop!
+
+# Wait, `convert_md_to_typst` is called in the loop.
+# I should add the save logic at the VERY END of the script.
+
+for dest_filename, source_files in mapping:
+    full_content = ""
+    for source_file in source_files:
+        source_path = os.path.join(SOURCE_BASE, source_file)
+        if os.path.exists(source_path):
+            with open(source_path, "r") as f:
+                full_content += f.read() + "\n\n"
+        else:
+            print(f"Warning: Source file not found: {source_path}")
+    
+    converted_content = convert_md_to_typst(full_content)
+    
+    # Add import at the top
+    # Import eightbyten template and local utils
+    # Standard header for all generated files
+    imports = '''#import "@local/eightbyten:0.1.0": *
+#import "../../typst/utils.typ": grammar-block, experiment, important, deprecated, memo
+
+'''
+    converted_content = imports + converted_content
+    
+    dest_path = os.path.join(DEST_BASE, dest_filename)
+    with open(dest_path, "w") as f:
+        f.write(converted_content)
+    print(f"Converted {dest_filename}")
+
+# Save updated cache
+try:
+    with open("generated/eyebrows.json", "w") as f:
+        json.dump(EYEBROW_LOOKUP, f, indent=4)
+    print("Updated eyebrows.json cache.")
+except Exception as e:
+    print(f"Warning: Could not save eyebrows.json: {e}")
+
+print("Migration complete.")

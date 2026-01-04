@@ -26,9 +26,24 @@ if ! command -v typst &> /dev/null; then
 fi
 
 # 2. Setup Environment
-# Ensure packages directory logic is handled.
-# If running locally, we might rely on the local checkout.
-# If TYPST_PACKAGE_PATH is set, use it. Otherwise default to 'packages'.
+echo "Setting up dependencies..."
+
+# Define where local packages live
+PACKAGE_DIR="packages/local/eightbyten/0.1.0"
+
+# Clean/Create package directory
+if [ ! -d "$PACKAGE_DIR" ]; then
+    echo "Downloading eightbyten package..."
+    mkdir -p "$PACKAGE_DIR"
+    # Clone deeper to a temp dir then move? Or just clone directly?
+    # git clone target must be empty.
+    git clone --depth 1 https://github.com/peterfriese/eightbyten.git "$PACKAGE_DIR"
+else
+    echo "Updating eightbyten package..."
+    # Optional: git -C "$PACKAGE_DIR" pull
+fi
+
+# Export path for Typst to find it
 export TYPST_PACKAGE_PATH="${TYPST_PACKAGE_PATH:-$PWD/packages}"
 
 # Check for Gemini API Key (Optional but recommended)
@@ -46,7 +61,7 @@ fi
 # 3. Migration
 echo "Converting DocC content to Typst..."
 mkdir -p generated/chapters/Assets
-python3 scripts/migrate.py
+bin/migrate-docs
 
 # 4. Compilation
 echo "Compiling PDF..."
