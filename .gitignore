@@ -1,9 +1,9 @@
-.DS_Store
-.docc-build
-.swiftpm
-/.build
-/Package.resolved
-/TSPL.docc/header.html
-/swift-book
+# Generated content
+generated/
+typst/chapters/ # Legacy ignoring, safe to keep for now
 
-typst/chapters/
+# OS Metadata
+.DS_Store
+
+# Helper scripts temp output if any
+*.tmp

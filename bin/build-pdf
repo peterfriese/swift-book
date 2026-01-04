@@ -31,9 +31,21 @@ fi
 # If TYPST_PACKAGE_PATH is set, use it. Otherwise default to 'packages'.
 export TYPST_PACKAGE_PATH="${TYPST_PACKAGE_PATH:-$PWD/packages}"
 
+# Check for Gemini API Key (Optional but recommended)
+if [[ -z "${GEMINI_API_KEY:-}" ]]; then
+    echo "----------------------------------------------------------------"
+    echo "NOTICE: GEMINI_API_KEY is not set."
+    echo "AI-generated chapter eyebrows will be disabled and fallback heuristics used."
+    echo ""
+    echo "To enable AI features:"
+    echo "  - Local: export GEMINI_API_KEY='your-key'"
+    echo "  - GitHub: Add GEMINI_API_KEY to Repository Secrets"
+    echo "----------------------------------------------------------------"
+fi
+
 # 3. Migration
 echo "Converting DocC content to Typst..."
-mkdir -p typst/chapters
+mkdir -p generated/chapters/Assets
 python3 scripts/migrate.py
 
 # 4. Compilation

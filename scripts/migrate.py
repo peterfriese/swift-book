@@ -47,7 +47,7 @@ mapping = [
 ]
 
 SOURCE_BASE = "TSPL.docc"
-DEST_BASE = "typst/chapters"
+DEST_BASE = "generated/chapters"
 
 import json
 import urllib.request
@@ -56,7 +56,7 @@ import os
 
 # Logic to load eyebrows.json
 try:
-    with open("scripts/eyebrows.json", "r") as f:
+    with open("generated/eyebrows.json", "r") as f:
         EYEBROW_LOOKUP = json.load(f)
 except Exception as e:
     print(f"Warning: Could not load eyebrows.json: {e}")
@@ -64,7 +64,7 @@ except Exception as e:
 
 # Logic to load experiments.json
 try:
-    with open("scripts/experiments.json", "r") as f:
+    with open("generated/experiments.json", "r") as f:
         EXPERIMENT_LOOKUP = json.load(f)
 except Exception as e:
     print(f"Warning: Could not load experiments.json: {e}")
@@ -699,7 +699,7 @@ for dest_filename, source_files in mapping:
 
 # Save updated cache
 try:
-    with open("scripts/eyebrows.json", "w") as f:
+    with open("generated/eyebrows.json", "w") as f:
         json.dump(EYEBROW_LOOKUP, f, indent=4)
     print("Updated eyebrows.json cache.")
 except Exception as e:
