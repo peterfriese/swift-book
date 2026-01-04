@@ -1,4 +1,4 @@
-#import "@local/eightbyten:0.1.0": *
+#import "@local/eightbyten:0.2.0": *
 
 // Override codly to debug raw block issues
 // #show raw: it => it

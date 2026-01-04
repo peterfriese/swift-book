@@ -1,7 +1,7 @@
 
 // Reusable utilities for The Swift Programming Language book
 
-#import "@local/eightbyten:0.1.0": note
+#import "@local/eightbyten:0.2.0": note
 
 #let grammar-block(title: none, body) = {
   block(

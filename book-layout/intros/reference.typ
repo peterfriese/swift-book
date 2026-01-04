@@ -1,0 +1,3 @@
+For those who require absolute precision, the Language Reference provides the formal definition of the Swift programming language. Unlike the Guide, which focuses on teaching and usage, this section describes the exact grammar and structure of valid Swift code.
+
+Intended for compiler engineers, tool builders, and developers who need to resolve ambiguities, this reference breaks down the language into its lexical and syntactic components. From the rules governing whitespace and comments to the complete formal grammar of expressions and statements, this is the authoritative source for the technical implementation details of Swift. Use this section when you need to understand the "why" and "how" behind the compiler's interpretation of your code.

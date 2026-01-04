@@ -1,0 +1,3 @@
+Swift is a powerful and intuitive programming language for all Apple platforms. It's designed to give you more freedom than ever before. Swift is easy to use and open source, so anyone with an idea can create something incredible.
+
+This section serves as your entry point into the world of Swift. You will begin by exploring the high-level goals that drive the language's design—safety, speed, and expressiveness. Following that, a hands-on guided tour will walk you through the syntax and features effectively, allowing you to write your first Swift code in minutes. Whether you are new to programming or an experienced developer coming from other languages, this foundation sets the stage for everything that follows.

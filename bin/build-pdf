@@ -29,15 +29,14 @@ fi
 echo "Setting up dependencies..."
 
 # Define where local packages live
-PACKAGE_DIR="packages/local/eightbyten/0.1.0"
+PACKAGE_DIR="packages/local/eightbyten/0.2.0"
 
 # Clean/Create package directory
 if [ ! -d "$PACKAGE_DIR" ]; then
     echo "Downloading eightbyten package..."
     mkdir -p "$PACKAGE_DIR"
-    # Clone deeper to a temp dir then move? Or just clone directly?
-    # git clone target must be empty.
-    git clone --depth 1 https://github.com/peterfriese/eightbyten.git "$PACKAGE_DIR"
+    # Clone specific version
+    git clone --depth 1 --branch v0.2.0 https://github.com/peterfriese/eightbyten.git "$PACKAGE_DIR"
 else
     echo "Updating eightbyten package..."
     # Optional: git -C "$PACKAGE_DIR" pull
