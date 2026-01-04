@@ -18,18 +18,25 @@ cd "$(git rev-parse --show-toplevel)"
 
 echo "Starting Swift Book PDF build..."
 
-# 1. Setup Environment
+# 1. Check Prerequisites
+if ! command -v typst &> /dev/null; then
+    echo "Error: 'typst' is not installed."
+    echo "Please install Typst: https://github.com/typst/typst"
+    exit 1
+fi
+
+# 2. Setup Environment
 # Ensure packages directory logic is handled.
 # If running locally, we might rely on the local checkout.
 # If TYPST_PACKAGE_PATH is set, use it. Otherwise default to 'packages'.
 export TYPST_PACKAGE_PATH="${TYPST_PACKAGE_PATH:-$PWD/packages}"
 
-# 2. Migration
+# 3. Migration
 echo "Converting DocC content to Typst..."
 mkdir -p typst/chapters
 python3 scripts/migrate.py
 
-# 3. Compilation
+# 4. Compilation
 echo "Compiling PDF..."
 OUTPUT_FILE="${1:-swift-book.pdf}"
 
