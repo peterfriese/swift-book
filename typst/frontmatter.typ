@@ -6,7 +6,7 @@
 
 #frontmatter[
   #dedication[
-    To the user, who will fill these pages with great ideas.
+    To the dreamers, the builders, and the crazy ones.
   ]
   
   #toc()
