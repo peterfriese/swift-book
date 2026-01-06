@@ -71,6 +71,21 @@ if ! python3 -c "import requests" &> /dev/null; then
     pip3 install requests --user
 fi
 
+echo "DEBUG: Verifying Typst Environment..."
+# List installed package files to ensure git clone worked
+ls -R "$PACKAGE_DIR" || echo "Package dir not found!"
+
+# Try to compile a minimal file to check dependencies
+cat > debug_check.typ <<EOF
+#import "@preview/codly:1.3.0": *
+#import "@preview/codly-languages:0.1.1": *
+#import "@preview/marginalia:0.3.1" as marginalia
+#import "@local/eightbyten:0.2.0": *
+Check
+EOF
+echo "Compiling debug_check.typ..."
+typst compile debug_check.typ || echo "Debug compilation failed!"
+
 # 4. Migration
 echo "Converting DocC content to Typst..."
 mkdir -p generated/chapters/Assets
