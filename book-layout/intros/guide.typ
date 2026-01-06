@@ -1,0 +1,3 @@
+The Language Guide is the heart of this book, offering a comprehensive and detailed exploration of Swift's features. It is structured to take you from the absolute basics—such as constants, variables, and common data types—all the way to advanced architectural concepts like protocol-oriented programming, concurrency, and memory safety.
+
+Each chapter is designed to be self-contained yet progressive, building on previous concepts to deepen your understanding. You will learn how to define functions, model complex data with structures and classes, handle errors gracefully, and utilize powerful modern features like macros. By mastering the topics in this guide, you will gain the fluency required to build robust, efficient, and elegant applications for any platform.

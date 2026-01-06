@@ -54,3 +54,28 @@ to display a local preview in your browser.
 > If you installed DocC by downloading Xcode,
 > run `xcrun docc preview TSPL.docc` instead.
 
+
+## Building the PDF
+
+You can also build a PDF version of *The Swift Programming Language* using [Typst](https://typst.app/). This version uses a beautiful [Tufte-inspired layout](https://edwardtufte.github.io/tufte-css/) for improved readability.
+
+### Prerequisites
+
+| Tool | Version | Notes |
+| :--- | :--- | :--- |
+| **Python** | 3.10+ | Required for migration scripts. |
+| **Typst** | 0.11.0+ | [Install Typst](https://github.com/typst/typst) |
+| **Gemini API Key** | Optional | Set `GEMINI_API_KEY` for AI-generated chapter eyebrows. |
+
+### Build Command
+
+We provide a unified build script that handles everything for you:
+
+```bash
+bin/build-pdf
+```
+
+This command will:
+1.  Check for required tools.
+2.  Convert the source content from DocC to Typst format (stored in `generated/`).
+3.  Compile the final PDF to `swift-book.pdf` in the root directory.

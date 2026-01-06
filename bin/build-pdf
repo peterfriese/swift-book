@@ -1,0 +1,77 @@
+#! /bin/bash
+
+# This source file is part of the Swift.org open source project
+#
+# Copyright (c) 2024 Apple Inc. and the Swift project authors
+# Licensed under Apache License v2.0 with Runtime Library Exception
+#
+# See https://swift.org/LICENSE.txt for license information
+# See https://swift.org/CONTRIBUTORS.txt for Swift project authors
+
+# Builds the PDF version of The Swift Programming Language using Typst.
+# This script handles the conversion from DocC to Typst and the compilation process.
+
+set -eux
+
+# Start at the top level directory of the repository.
+cd "$(git rev-parse --show-toplevel)"
+
+echo "Starting Swift Book PDF build..."
+
+# 1. Check Prerequisites
+if ! command -v typst &> /dev/null; then
+    echo "Error: 'typst' is not installed."
+    echo "Please install Typst: https://github.com/typst/typst"
+    exit 1
+fi
+
+# 2. Setup Environment
+echo "Setting up dependencies..."
+
+# Define where local packages live
+PACKAGE_DIR="packages/local/eightbyten/0.2.0"
+
+# Clean/Create package directory
+if [ ! -d "$PACKAGE_DIR" ]; then
+    echo "Downloading eightbyten package..."
+    mkdir -p "$PACKAGE_DIR"
+    # Clone specific version
+    git clone --depth 1 --branch v0.2.0 https://github.com/peterfriese/eightbyten.git "$PACKAGE_DIR"
+else
+    echo "Updating eightbyten package..."
+    # Optional: git -C "$PACKAGE_DIR" pull
+fi
+
+# Export path for Typst to find it
+export TYPST_PACKAGE_PATH="${TYPST_PACKAGE_PATH:-$PWD/packages}"
+
+# Check for Gemini API Key (Optional but recommended)
+if [[ -z "${GEMINI_API_KEY:-}" ]]; then
+    echo "----------------------------------------------------------------"
+    echo "NOTICE: GEMINI_API_KEY is not set."
+    echo "AI-generated chapter eyebrows will be disabled and fallback heuristics used."
+    echo ""
+    echo "To enable AI features:"
+    echo "  - Local: export GEMINI_API_KEY='your-key'"
+    echo "  - GitHub: Add GEMINI_API_KEY to Repository Secrets"
+    echo "----------------------------------------------------------------"
+fi
+
+# 3. Check Python Dependencies
+if ! python3 -c "import requests" &> /dev/null; then
+    echo "Installing required Python package: requests..."
+    pip3 install requests --user
+fi
+
+# 4. Migration
+echo "Converting DocC content to Typst..."
+mkdir -p generated/chapters/Assets
+bin/migrate-docs
+
+# 5. Compilation
+echo "Compiling PDF..."
+OUTPUT_FILE="${1:-swift-book.pdf}"
+
+typst compile book-layout/main.typ "$OUTPUT_FILE" --root .
+
+echo "Build complete: $OUTPUT_FILE"

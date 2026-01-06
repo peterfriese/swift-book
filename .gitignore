@@ -1,7 +1,19 @@
+# Generated content
+generated/
+swift-book.pdf
+
+# Dependencies (Downloaded by build script)
+packages/
+
+# OS Metadata
 .DS_Store
+
+# Helper scripts temp output if any
+*.tmp
+
+# Swift/DocC build artifacts
 .docc-build
 .swiftpm
 /.build
 /Package.resolved
 /TSPL.docc/header.html
-/swift-book
