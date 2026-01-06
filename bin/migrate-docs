@@ -85,8 +85,8 @@ def generate_eyebrow_with_ai(text):
     if not GEMINI_API_KEY:
         return None
     
-    # Updated to gemini-2.0-flash which is available and efficient
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+    # Updated to gemini-3-flash-preview as requested
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key={GEMINI_API_KEY}"
     headers = {'Content-Type': 'application/json'}
     
     prompt = f"Summarize the following chapter introduction into a very short, punchy eyebrow (max 5 words). Do not end with a period. Return only the text.\n\nText: {text}"
