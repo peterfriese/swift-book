@@ -91,7 +91,25 @@ if [ ! -d "$FONT_DIR" ] || [ -z "$(ls -A "$FONT_DIR")" ]; then
     rm -rf plex.zip plex_tmp
 fi
 
-# 6. Compilation
+# 6. Pre-fetch Dependencies
+echo "Fetching Typst packages..."
+cat > prefetch.typ <<EOF
+#import "@preview/codly:1.3.0": *
+#import "@preview/codly-languages:0.1.1": *
+#import "@preview/marginalia:0.3.1" as marginalia
+#import "@preview/in-dexter:0.7.2" as dexter
+// We don't need to do anything, just import to trigger download
+#page[Ok] 
+EOF
+
+# Compile to force download (suppress output unless error)
+if ! typst compile prefetch.typ > /dev/null 2>&1; then
+    echo "Warning: Failed to pre-fetch some packages. Build might be slower or fail."
+    # We don't exit here, let the main build try.
+fi
+rm prefetch.typ
+
+# 7. Compilation
 echo "Compiling PDF..."
 OUTPUT_FILE="${1:-swift-book.pdf}"
 
