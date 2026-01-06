@@ -107,7 +107,7 @@ if ! typst compile prefetch.typ > /dev/null 2>&1; then
     echo "Warning: Failed to pre-fetch some packages. Build might be slower or fail."
     # We don't exit here, let the main build try.
 fi
-rm prefetch.typ
+rm prefetch.typ prefetch.pdf
 
 # 7. Compilation
 echo "Compiling PDF..."
