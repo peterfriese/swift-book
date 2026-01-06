@@ -3,7 +3,7 @@ name: Publish Book
 on:
   push:
     branches:
-      - main
+      - pdf-edition
 
 jobs:
   build:
@@ -49,3 +49,10 @@ jobs:
           name: Swift Book ${{ env.VERSION }}
           draft: false
           prerelease: false
+
+      - name: Upload PDF Artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: swift-book-pdf
+          path: swift-book.pdf
