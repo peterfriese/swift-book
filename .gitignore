@@ -10,7 +10,12 @@ fonts/
 .DS_Store
 
 # Helper scripts temp output if any
+# Helper scripts temp output if any
 *.tmp
+*_log.txt
+build_logs.txt
+prefetch.typ
+prefetch.pdf
 
 # Swift/DocC build artifacts
 .docc-build
