@@ -28,8 +28,16 @@ fi
 # 2. Setup Environment
 echo "Setting up dependencies..."
 
+# Determine Typst Data Directory
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  TYPST_DATA_DIR="$HOME/Library/Application Support/typst"
+else
+  # Default to XDG or Linux standard
+  TYPST_DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/typst"
+fi
+
 # Define where local packages live
-PACKAGE_DIR="packages/local/eightbyten/0.2.0"
+PACKAGE_DIR="$TYPST_DATA_DIR/packages/local/eightbyten/0.2.0"
 
 # Clean/Create package directory
 if [ ! -d "$PACKAGE_DIR" ]; then
@@ -42,8 +50,8 @@ else
     # Optional: git -C "$PACKAGE_DIR" pull
 fi
 
-# Export path for Typst to find it
-export TYPST_PACKAGE_PATH="${TYPST_PACKAGE_PATH:-$PWD/packages}"
+# Note: We rely on standard Typst discovery, so no need to export TYPST_PACKAGE_PATH
+# export TYPST_PACKAGE_PATH="${TYPST_PACKAGE_PATH:-$PWD/packages}"
 
 # Check for Gemini API Key (Optional but recommended)
 if [[ -z "${GEMINI_API_KEY:-}" ]]; then
