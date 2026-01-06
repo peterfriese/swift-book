@@ -4,6 +4,7 @@ swift-book.pdf
 
 # Dependencies (Downloaded by build script)
 packages/
+fonts/
 
 # OS Metadata
 .DS_Store

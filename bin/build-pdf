@@ -76,10 +76,25 @@ echo "Converting DocC content to Typst..."
 mkdir -p generated/chapters/Assets
 bin/migrate-docs
 
-# 5. Compilation
+# 5. Font Check
+FONT_DIR="fonts"
+if [ ! -d "$FONT_DIR" ] || [ -z "$(ls -A "$FONT_DIR")" ]; then
+    echo "Downloading IBM Plex fonts..."
+    mkdir -p "$FONT_DIR"
+    # Download IBM Plex TrueType zip
+    curl -L -o plex.zip https://github.com/IBM/plex/releases/download/v6.4.0/TrueType.zip
+    # Unzip specifically the files we need (or all) into a temp dir
+    unzip -o -q plex.zip -d plex_tmp
+    # Move TTF files to fonts dir (flatten structure)
+    find plex_tmp -name "*.ttf" -exec mv {} "$FONT_DIR/" \;
+    # Cleanup
+    rm -rf plex.zip plex_tmp
+fi
+
+# 6. Compilation
 echo "Compiling PDF..."
 OUTPUT_FILE="${1:-swift-book.pdf}"
 
-typst compile book-layout/main.typ "$OUTPUT_FILE" --root .
+typst compile book-layout/main.typ "$OUTPUT_FILE" --root . --font-path "$FONT_DIR"
 
 echo "Build complete: $OUTPUT_FILE"
