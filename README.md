@@ -1,9 +1,21 @@
 # The Swift Programming Language
 
+[![Download PDF](https://img.shields.io/github/v/release/peterfriese/swift-book?label=Download%20PDF&style=for-the-badge)](https://github.com/peterfriese/swift-book/releases/latest/download/swift-book.pdf)
+
+<p align="center">
+  <img src="assets/cover.png" width="19%" alt="Cover">
+  <img src="assets/toc.png" width="19%" alt="Table of Contents">
+  <img src="assets/content-1.png" width="19%" alt="Control Flow (While Loops) Page 1">
+  <img src="assets/content-2.png" width="19%" alt="Control Flow (While Loops) Page 2">
+  <img src="assets/content-3.png" width="19%" alt="Control Flow (While Loops) Page 3">
+</p>
+
 This repository contains the source for *The Swift Programming Language*
 (sometimes abbreviated as TSPL),
 which is published on [docs.swift.org][published]
 and built using [Swift-DocC][docc].
+
+This fork creates a **beautiful, printable PDF edition** using [Typst](https://typst.app/).
 
 ## Contributing
 
@@ -57,14 +69,16 @@ to display a local preview in your browser.
 
 ## Building the PDF
 
-You can also build a PDF version of *The Swift Programming Language* using [Typst](https://typst.app/). This version uses a beautiful [Tufte-inspired layout](https://edwardtufte.github.io/tufte-css/) for improved readability.
+**The PDF is built automatically** on every push to the `pdf-edition` branch and attached to Releases. You generally do not need to build it manually.
+
+However, if you want to build a local copy:
 
 ### Prerequisites
 
 | Tool | Version | Notes |
 | :--- | :--- | :--- |
 | **Python** | 3.10+ | Required for migration scripts. |
-| **Typst** | 0.11.0+ | [Install Typst](https://github.com/typst/typst) |
+| **Typst** | 0.13.0+ | [Install Typst](https://github.com/typst/typst) |
 | **Gemini API Key** | Optional | Set `GEMINI_API_KEY` for AI-generated chapter eyebrows. |
 
 ### Build Command
@@ -76,6 +90,6 @@ bin/build-pdf
 ```
 
 This command will:
-1.  Check for required tools.
+1.  Check for required tools and download fonts if missing.
 2.  Convert the source content from DocC to Typst format (stored in `generated/`).
 3.  Compile the final PDF to `swift-book.pdf` in the root directory.

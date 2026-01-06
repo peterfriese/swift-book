@@ -478,6 +478,8 @@ def convert_md_to_typst(text):
         
         # Headings (only if NOT in blockquote for safety? Typst layout might break if heading inside note?)
         # Let's assume no headings in notes.
+        heading_function = None
+        
         if not in_blockquote:
             if line.startswith("# "):
                 # Buffer the title to see if next text is eyebrow
@@ -491,26 +493,29 @@ def convert_md_to_typst(text):
                 if pending_chapter_title:
                      new_lines.append(f"= {pending_chapter_title}")
                      pending_chapter_title = None
-                new_lines.append("== " + line[3:])
+                heading_function = "section"
+                line = line[3:].strip()
                 expecting_eyebrow = False
-                continue
-            if line.startswith("### "):
+                
+            elif line.startswith("### "):
                 if pending_chapter_title:
                      new_lines.append(f"= {pending_chapter_title}")
                      pending_chapter_title = None
-                new_lines.append("=== " + line[4:])
+                heading_function = "subsection"
+                line = line[4:].strip()
                 expecting_eyebrow = False
-                continue
-            if line.startswith("#### "):
+                
+            elif line.startswith("#### "):
                 if pending_chapter_title:
                      new_lines.append(f"= {pending_chapter_title}")
                      pending_chapter_title = None
-                new_lines.append("==== " + line[5:])
+                heading_function = "subsubsection"
+                line = line[5:].strip()
                 expecting_eyebrow = False
-                continue
 
         # Lists (Ordered)
-        if re.match(r'^\d+\.\s', line):
+        # We ensure that this line wasn't detected as a heading
+        if heading_function is None and re.match(r'^\d+\.\s', line):
             if pending_chapter_title:
                  new_lines.append(f"= {pending_chapter_title}")
                  pending_chapter_title = None
@@ -661,7 +666,10 @@ def convert_md_to_typst(text):
              # cancel -> flush -> set False.
              pass
 
-        new_lines.append(line)
+        if heading_function:
+             new_lines.append(f"#{heading_function}[{line}]")
+        else:
+             new_lines.append(line)
     
     # Safety: Close code block if open
     if current_fence_length > 0:
