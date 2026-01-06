@@ -55,3 +55,26 @@ git push origin pdf-edition
 
 ## Verify
 Check the **Actions** tab in GitHub to see the new build running. Once complete, the updated `swift-book.pdf` will be attached to the release or artifact.
+
+## Creating a Release
+
+To publish a formal release (e.g., for a specific Swift version) that aligns with the official tags:
+
+1.  **Check Upstream Tags**: Find the matching tag from the official repo.
+    ```bash
+    git fetch upstream --tags
+    git tag -l "swift-*" | tail
+    # Example: swift-6.2.3-fcs
+    ```
+
+2.  **Create Custom Tag**: Create a local tag with the `-pdf` suffix.
+    ```bash
+    git tag swift-6.2.3-fcs-pdf
+    ```
+
+3.  **Push to Publish**: Pushing the tag triggers the release workflow.
+    ```bash
+    git push origin swift-6.2.3-fcs-pdf
+    ```
+
+This will automatically create a **GitHub Release** with the PDF attached.
