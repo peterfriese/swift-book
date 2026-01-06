@@ -1,6 +1,6 @@
 # Generated content
 generated/
-book-layout/chapters/ # Legacy ignoring, safe to keep for now
+swift-book.pdf
 
 # Dependencies (Downloaded by build script)
 packages/
@@ -10,3 +10,10 @@ packages/
 
 # Helper scripts temp output if any
 *.tmp
+
+# Swift/DocC build artifacts
+.docc-build
+.swiftpm
+/.build
+/Package.resolved
+/TSPL.docc/header.html

@@ -57,12 +57,18 @@ if [[ -z "${GEMINI_API_KEY:-}" ]]; then
     echo "----------------------------------------------------------------"
 fi
 
-# 3. Migration
+# 3. Check Python Dependencies
+if ! python3 -c "import requests" &> /dev/null; then
+    echo "Installing required Python package: requests..."
+    pip3 install requests --user
+fi
+
+# 4. Migration
 echo "Converting DocC content to Typst..."
 mkdir -p generated/chapters/Assets
 bin/migrate-docs
 
-# 4. Compilation
+# 5. Compilation
 echo "Compiling PDF..."
 OUTPUT_FILE="${1:-swift-book.pdf}"
 
