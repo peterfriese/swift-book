@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - pdf-edition
+    tags:
+      - 'swift-*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
