@@ -624,7 +624,7 @@ print(n.nextUp)
 Floating-point numbers have values for
 negative zero, infinity, and negative infinity,
 which represent overflow and underflow in calculations.
-They also have include not-a-number (NaN) values
+They also have not-a-number (NaN) values
 to represent an invalid or undefined result,
 such as dividing zero by zero.
 This behavior is different from integers,
@@ -1699,7 +1699,7 @@ see <doc:BasicOperators#Nil-Coalescing-Operator>.
 
 When `nil` represents an unrecoverable failure,
 such as a programmer error or corrupted state,
-you can access the underlying value
+you can access the underlying value of the optional
 by adding an exclamation mark (`!`) to the end of the optional's name.
 This is known as *force unwrapping* the optional's value.
 When you force unwrap a non-`nil` value,
@@ -1914,7 +1914,7 @@ discussed in <doc:TheBasics#Error-Handling>
 and <doc:TheBasics#Assertions-and-Preconditions> below.
 However, in some cases,
 the *only* safe way to handle an error is to stop execution.
-If you need to guarantee that a service never unexpected stops,
+If you need to guarantee that a service never unexpectedly stops,
 incorporate fault tolerance into its overall architecture,
 so it can recover from any of its components stopping unexpectedly.
 
