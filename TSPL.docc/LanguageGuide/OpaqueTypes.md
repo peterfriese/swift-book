@@ -194,7 +194,7 @@ func max<T>(_ x: T, _ y: T) -> T where T: Comparable { ... }
 ```
 
 <!--
-  From https://developer.apple.com/documentation/swift/1538951-max
+  From https://developer.apple.com/documentation/swift/max(_:_:)
   Not test code because it won't actually compile
   and there's nothing to meaningfully test.
 -->
@@ -485,7 +485,7 @@ func `repeat`<T: Shape>(shape: T, count: Int) -> some Collection {
 In this case,
 the underlying type of the return value
 varies depending on `T`:
-Whatever shape is passed it,
+Whatever shape is passed in,
 `repeat(shape:count:)` creates and returns an array of that shape.
 Nevertheless,
 the return value always has the same underlying type of `[T]`,

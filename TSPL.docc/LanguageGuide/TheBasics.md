@@ -30,7 +30,7 @@ checks whether a value is missing before using the value,
 and non-optional values are guaranteed to never be missing.
 
 Swift is a safe language,
-which means it makes it easier for you find and fix several categories of bugs
+which means it makes it easier for you to find and fix several categories of bugs
 as early as possible during the development process,
 and lets you guarantee that certain kinds of bugs can't happen.
 Type safety enables you to be clear about
@@ -542,7 +542,7 @@ The values of these properties are of the appropriate-sized number type
 and can therefore be used in expressions alongside other values of the same type.
 
 Calculations that produce out-of-bounds results,
-like a number larger that the `max` property,
+like a number larger than the `max` property,
 stop the program's execution instead of storing an invalid result.
 You can explicitly make the operation overflow instead,
 as described in <doc:AdvancedOperators#Overflow-Operators>.
@@ -1529,7 +1529,7 @@ the `actualNumber` constant becomes available for use within
 the first branch of the `if` statement.
 It has already been initialized with the value contained within the optional,
 and has the corresponding non-optional type.
-In this case, the type of `possibleNumber` is `Int?`,
+In this case, the type of `Int(possibleNumber)` is `Int?`,
 so the type of `actualNumber` is `Int`.
 
 If you don't need to refer to the original, optional constant or variable
@@ -2125,7 +2125,7 @@ without impacting performance in production.
 -->
 
 You write an assertion by calling the
-[`assert(_:_:file:line:)`](https://developer.apple.com/documentation/swift/1541112-assert) function
+[`assert(_:_:file:line:)`](https://developer.apple.com/documentation/swift/assert(_:_:file:line:)) function
 from the Swift standard library.
 You pass this function an expression that evaluates to `true` or `false`
 and a message to display if the result of the condition is `false`.
@@ -2183,7 +2183,7 @@ assert(age >= 0)
 
 If the code already checks the condition,
 you use the
-[`assertionFailure(_:file:line:)`](https://developer.apple.com/documentation/swift/1539616-assertionfailure) function
+[`assertionFailure(_:file:line:)`](https://developer.apple.com/documentation/swift/assertionfailure(_:file:line:)) function
 to indicate that an assertion has failed.
 For example:
 
@@ -2221,7 +2221,7 @@ For example, use a precondition to check that a subscript isn't out of bounds,
 or to check that a function has been passed a valid value.
 
 You write a precondition by calling the
-[`precondition(_:_:file:line:)`](https://developer.apple.com/documentation/swift/1540960-precondition) function.
+[`precondition(_:_:file:line:)`](https://developer.apple.com/documentation/swift/precondition(_:_:file:line:)) function.
 You pass this function an expression that evaluates to `true` or `false`
 and a message to display if the result of the condition is `false`.
 For example:
@@ -2243,7 +2243,7 @@ precondition(index > 0, "Index must be greater than zero.")
 -->
 
 You can also call the
-[`preconditionFailure(_:file:line:)`](https://developer.apple.com/documentation/swift/1539374-preconditionfailure) function
+[`preconditionFailure(_:file:line:)`](https://developer.apple.com/documentation/swift/preconditionfailure(_:file:line:)) function
 to indicate that a failure has occurred ---
 for example, if the default case of a switch was taken,
 but all valid input data should have been handled

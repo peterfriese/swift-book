@@ -597,7 +597,7 @@ see <doc:Initialization#Required-Initializers>.
 
 > Note: You don't need to mark protocol initializer implementations with the `required` modifier
 > on classes that are marked with the `final` modifier,
-> because final classes can't subclassed.
+> because final classes can't be subclassed.
 > For more about the `final` modifier, see <doc:Inheritance#Preventing-Overrides>.
 
 <!--
@@ -1242,13 +1242,13 @@ to implement the protocol requirements yourself.
   as long as the section stays around, that topic ID will be there too.
 
   Conforming to the Equatable Protocol
-  https://developer.apple.com/documentation/swift/equatable#2847780
+  https://developer.apple.com/documentation/swift/equatable#Conforming-to-the-Equatable-Protocol
 
   Conforming to the Hashable Protocol
-  https://developer.apple.com/documentation/swift/hashable#2849490
+  https://developer.apple.com/documentation/swift/hashable#Conforming-to-the-Hashable-Protocol
 
   Conforming to the Comparable Protocol
-  https://developer.apple.com/documentation/swift/comparable#2845320
+  https://developer.apple.com/documentation/swift/comparable#Conforming-to-the-Comparable-Protocol
 
   ^-- Need to add discussion of synthesized implementation
   to the reference for Comparable, since that's new
@@ -1256,7 +1256,7 @@ to implement the protocol requirements yourself.
   Some of the information in the type references above
   is also repeated in the "Conform Automatically to Equatable and Hashable" section
   of the article "Adopting Common Protocols".
-  https://developer.apple.com/documentation/swift/adopting_common_protocols#2991123
+  https://developer.apple.com/documentation/swift/adopting-common-protocols#Conform-Automatically-to-Equatable-and-Hashable
 -->
 
 Swift provides a synthesized implementation of `Equatable`
@@ -1749,6 +1749,80 @@ that tries to adopt `SomeClassOnlyProtocol`.
 <!--
   TODO: a Cacheable protocol might make a good example here?
 -->
+
+You can also name a specific class in a protocol's inheritance list
+to require that all conforming types are subclasses of that class.
+
+```swift
+class Renderer {
+    func render(_ text: String) {
+        print(text)
+    }
+}
+
+protocol Widget: Renderer {
+    var title: String { get }
+}
+
+extension Widget {
+    func display() {
+        render(title)
+    }
+}
+
+class ButtonWidget: Renderer, Widget {
+    var title: String
+    init(title: String) {
+        self.title = title
+    }
+}
+
+let button = ButtonWidget(title: "OK")
+button.display()
+// Prints "OK".
+```
+
+<!--
+  - test: `classNameInProtocol`
+
+  ```swifttest
+  -> class Renderer {
+        func render(_ text: String) {
+            print(text)
+        }
+     }
+
+  -> protocol Widget: Renderer {
+        var title: String { get }
+     }
+
+  -> extension Widget {
+        func display() {
+            render(title)
+        }
+     }
+
+  -> class ButtonWidget: Renderer, Widget {
+        var title: String
+        init(title: String) {
+            self.title = title
+        }
+     }
+
+  -> let button = ButtonWidget(title: "OK")
+  -> button.display()
+  <- OK
+  ```
+-->
+
+In the example above, `Widget` can only be adopted by subclasses of `Renderer`.
+Because the protocol guarantees that every conforming type is a `Renderer` subclass,
+the `Widget` protocol extension can call `render(_:)` directly.
+A superclass requirement is more restrictive than using `AnyObject`:
+it limits conformance to a specific class hierarchy,
+not just any class type.
+Use this when the protocol's implementation
+depends on the concrete behavior of a particular base class.
 
 ## Protocol Composition
 

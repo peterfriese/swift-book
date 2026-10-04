@@ -1082,7 +1082,7 @@ type(of: someInstance).printClassName()
 -->
 
 For more information,
-see [`type(of:)`](https://developer.apple.com/documentation/swift/2885064-type)
+see [`type(of:)`](https://developer.apple.com/documentation/swift/type(of:))
 in the Swift standard library.
 
 Use an initializer expression to construct an instance of a type
@@ -1307,7 +1307,7 @@ the `Self` type refers to the type
 introduced by the innermost type declaration.
 
 The `Self` type refers to the same type
-as the [`type(of:)`](https://developer.apple.com/documentation/swift/2885064-type)
+as the [`type(of:)`](https://developer.apple.com/documentation/swift/type(of:))
 function in the Swift standard library.
 Writing `Self.someStaticMember` to access a member of the current type
 is the same as writing `type(of: self).someStaticMember`.
@@ -1350,7 +1350,7 @@ to specify the type of its raw values, see <doc:Enumerations#Raw-Values>.
 > Grammar of a type inheritance clause:
 >
 > *type-inheritance-clause* → **`:`** *type-inheritance-list* \
-> *type-inheritance-list* → *attributes*_?_ **`~`**_?_ *type-identifier* | *attributes*_?_ *type-identifier* **`,`** *type-inheritance-list*
+> *type-inheritance-list* → *attributes*_?_ **`~`**_?_ *type-identifier* | *attributes*_?_ **`~`**_?_ *type-identifier* **`,`** *type-inheritance-list*
 
 ## Type Inference
 

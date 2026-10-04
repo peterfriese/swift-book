@@ -2416,7 +2416,7 @@ For example, the following protocol can be adopted only by class types:
 
 ```swift
 protocol SomeProtocol: AnyObject {
-    /* Protocol members go here */
+    /* Protocol members go here. */
 }
 ```
 
@@ -2425,7 +2425,7 @@ protocol SomeProtocol: AnyObject {
 
   ```swifttest
   -> protocol SomeProtocol: AnyObject {
-         /* Protocol members go here */
+         /* Protocol members go here. */
      }
   ```
 -->
@@ -2436,6 +2436,28 @@ can likewise be adopted only by class types.
 > Note: If a protocol is marked with the `objc` attribute,
 > the `AnyObject` requirement is implicitly applied to that protocol;
 > there’s no need to mark the protocol with the `AnyObject` requirement explicitly.
+
+You can also name a specific class in the *inherited protocols* list
+to restrict adoption of the protocol to subclasses of that class.
+For example, the following protocol can be adopted only by subclasses of `SomeBaseClass`:
+
+```swift
+class SomeBaseClass { /* ... */ }
+protocol SomeRefinedProtocol: SomeBaseClass {
+    /* Protocol members go here. */
+}
+```
+
+<!--
+  - test: `protocol-declaration-superclass`
+
+  ```swifttest
+  -> class SomeBaseClass {}
+  -> protocol SomeRefinedProtocol: SomeBaseClass {
+         /* Protocol members go here. */
+     }
+  ```
+-->
 
 Protocols are named types, and thus they can appear in all the same places
 in your code as other named types, as discussed in <doc:Protocols#Protocols-as-Types>.
@@ -2483,7 +2505,7 @@ directly in the protocol in which it's declared.
 The getter and setter requirements can be satisfied by a conforming type in a variety of ways.
 If a property declaration includes both the `get` and `set` keywords,
 a conforming type can implement it with a stored variable property
-or a computed property that's both readable and writeable
+or a computed property that's both readable and writable
 (that is, one that implements both a getter and a setter). However,
 that property declaration can't be implemented as a constant property
 or a read-only computed property. If a property declaration includes

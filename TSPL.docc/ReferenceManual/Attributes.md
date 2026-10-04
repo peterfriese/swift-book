@@ -97,6 +97,16 @@ indicates the macro's role:
   on an extension, a type alias, or a type that's nested inside a function,
   or use an extension macro to add an extension that has a peer macro.
 
+- term Body macros:
+  Write `body` as the first argument to this attribute.
+  The type that implements the macro conforms to the `BodyMacro` protocol.
+  These macros can generate, modify, or replace
+  the body of the function or accessor that they're attached to.
+  You can write at most one body macro on any given function.
+  If an original function body is provided,
+  it must be syntactically correct,
+  but it isn’t type checked until after the macro is expanded.
+
 The peer and member macro roles require a `names:` argument,
 listing the names of the symbols that the macro generates.
 The accessor macro role requires a `names:` argument if the
@@ -638,7 +648,7 @@ must have a single parameter that conforms to the
 [`ExpressibleByDictionaryLiteral`](https://developer.apple.com/documentation/swift/expressiblebydictionaryliteral)
 protocol,
 and the return type can be any type.
-The parameter's [`Key`](https://developer.apple.com/documentation/swift/expressiblebydictionaryliteral/2294108-key)
+The parameter's [`Key`](https://developer.apple.com/documentation/swift/expressiblebydictionaryliteral/key)
 must be
 [`ExpressibleByStringLiteral`](https://developer.apple.com/documentation/swift/expressiblebystringliteral).
 The previous example uses [`KeyValuePairs`](https://developer.apple.com/documentation/swift/keyvaluepairs)
@@ -1385,7 +1395,7 @@ For more information, see
 > can also change the runtime name for that declaration.
 > You use the runtime name when calling functions
 > that interact with the Objective-C runtime,
-> like [`NSClassFromString(_:)`](https://developer.apple.com/documentation/foundation/1395135-nsclassfromstring),
+> like [`NSClassFromString(_:)`](https://developer.apple.com/documentation/foundation/nsclassfromstring(_:)),
 > and when specifying class names in an app's Info.plist file.
 > If you specify a name by passing an argument,
 > that name is used as the name in Objective-C code
@@ -1705,6 +1715,16 @@ s.$x.wrapper  // WrapperWithProjection value
   -> s.$x.wrapper  // WrapperWithProjection value
   ```
 -->
+
+If the projected value wraps a variable that's named using a raw identifier,
+you also use a raw identifier to refer to
+the value's synthesized storage and its the projected value.
+Write the underscore or dollar sign inside the backticks;
+for example, `` someValue.`_some raw identifier` ``
+refers to the synthesized storage
+for a property that include spaces in its name,
+and `` someValue.`$some raw identifier` ``
+refers to its projected value.
 
 ### resultBuilder
 
@@ -2530,7 +2550,7 @@ passing this class's name as the name of the delegate class.
 
 If you don't use this attribute,
 supply a `main.swift` file with code at the top level
-that calls the [`UIApplicationMain(_:_:_:_:)`](https://developer.apple.com/documentation/uikit/1622933-uiapplicationmain) function.
+that calls the [`UIApplicationMain(_:_:_:_:)`](https://developer.apple.com/documentation/uikit/uiapplicationmain(_:_:_:_:)-1yub7) function.
 For example,
 if your app uses a custom subclass of `UIApplication`
 as its principal class,
@@ -2602,9 +2622,9 @@ with the same name that are accessible from the same scope.
 
 For example,
 the Swift standard library includes both a top-level
-[`min(_:_:)`](https://developer.apple.com/documentation/swift/1538339-min/)
+[`min(_:_:)`](https://developer.apple.com/documentation/swift/min(_:_:))
 function and a
-[`min()`](https://developer.apple.com/documentation/swift/sequence/1641174-min)
+[`min()`](https://developer.apple.com/documentation/swift/sequence/min())
 method for sequences with comparable elements.
 The sequence method is declared with the `warn_unqualified_access` attribute
 to help reduce confusion
