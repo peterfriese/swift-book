@@ -1,6 +1,7 @@
 # Generated content
 generated/
 swift-book.pdf
+*.pdf
 
 # Dependencies (Downloaded by build script)
 packages/
