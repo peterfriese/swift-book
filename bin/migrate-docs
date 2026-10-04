@@ -753,6 +753,55 @@ for item_type, value in structure:
         generated_typst_lines.append(f'#include "chapters/{dest_filename}"')
         print(f"Converted {dest_filename}")
 
+def extract_and_write_version_info():
+    version = "6.4"
+    xcode_version = "Xcode 27"
+    
+    # 1. Check The-Swift-Programming-Language.md
+    manifest_path = os.path.join(SOURCE_BASE, "The-Swift-Programming-Language.md")
+    if os.path.exists(manifest_path):
+        with open(manifest_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                m = re.search(r'#\s*The Swift Programming Language\s*\(([^)]+)\)', line)
+                if m:
+                    version = m.group(1).strip()
+                    break
+                    
+    # 2. Check Compatibility.md for Xcode version
+    compat_path = os.path.join(SOURCE_BASE, "GuidedTour", "Compatibility.md")
+    if os.path.exists(compat_path):
+        with open(compat_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+            m = re.search(r'included in (Xcode [0-9]+(?:\.[0-9]+)?)', content)
+            if m:
+                xcode_version = m.group(1).strip()
+
+    # 3. Release tag from environment or git
+    release_tag = os.environ.get("RELEASE_TAG") or os.environ.get("VERSION")
+    if not release_tag:
+        try:
+            import subprocess
+            out = subprocess.check_output(["git", "describe", "--tags", "--match", "swift-*"], stderr=subprocess.DEVNULL)
+            release_tag = out.decode('utf-8').strip()
+        except Exception:
+            release_tag = f"swift-{version}-fcs-pdf"
+            
+    # 4. Formatted date
+    import datetime
+    now = datetime.datetime.now()
+    published_date = now.strftime("%B %Y")
+    
+    version_path = os.path.join("generated", "version.typ")
+    with open(version_path, "w", encoding="utf-8") as f:
+        f.write(f'#let swift-version = "{version}"\n')
+        f.write(f'#let xcode-version = "{xcode_version}"\n')
+        f.write(f'#let release-tag = "{release_tag}"\n')
+        f.write(f'#let edition-title = "Swift {version} Edition"\n')
+        f.write(f'#let published-date = "{published_date}"\n')
+    print(f"Generated version info: Swift {version} ({xcode_version}), tag: {release_tag}")
+
+extract_and_write_version_info()
+
 # Write book_content.typ
 book_content_path = os.path.join("generated", "book_content.typ")
 with open(book_content_path, "w") as f:
