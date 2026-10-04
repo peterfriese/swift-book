@@ -74,6 +74,9 @@ fi
 # 4. Migration
 echo "Converting DocC content to Typst..."
 mkdir -p generated/chapters/Assets
+if [ ! -f "TSPL.docc/ReferenceManual/SummaryOfTheGrammar.md" ]; then
+    bin/generate-grammar
+fi
 bin/migrate-docs
 
 # 5. Font Check
