@@ -29,6 +29,21 @@
 
 #show figure.where(kind: "experiment"): it => it.body
 
+// Keep code blocks of reasonable length intact on one page
+#show raw.where(block: true): it => {
+  let line-count = it.text.split("\n").len()
+  if line-count < 25 {
+    block(breakable: false, it)
+  } else {
+    it
+  }
+}
+
+// Micro-typography polish
+#set text(hyphenate: true)
+#set list(tight: true)
+#set enum(tight: true)
+
 #show: eightbyten.with(
   title: title-content,
   authors: ("Apple Inc.",),
@@ -45,6 +60,22 @@
     mono: "IBM Plex Mono"
   ),
   paper: "8in x 10in"
+)
+
+// Suppress running headers on pages before the first numbered chapter
+#set page(
+  header: context {
+    let current-chapter = query(selector(heading.where(level: 2)).before(here()))
+    if current-chapter.len() == 0 {
+      none
+    } else {
+      book-header((
+        serif: "IBM Plex Serif",
+        sans: "IBM Plex Sans",
+        mono: "IBM Plex Mono"
+      ))
+    }
+  }
 )
 
 #include "frontmatter.typ"

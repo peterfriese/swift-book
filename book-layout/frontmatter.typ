@@ -10,6 +10,6 @@
   ]
   
   #toc()
-  #pagebreak()
+  #pagebreak(weak: true)
   #outline(title: "List of Experiments", target: figure.where(kind: "experiment"))
 ]

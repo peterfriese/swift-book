@@ -150,6 +150,54 @@ def get_smart_eyebrow(text, title=None):
 
     return text
 
+def apply_sticky_lead_ins(lines):
+    result = list(lines)
+    n = len(result)
+    for i in range(n):
+        line = result[i].strip()
+        is_block_start = line.startswith("```") or line.startswith("#image(") or line.startswith("#figure(") or line.startswith("- ") or line.startswith("+ ") or bool(re.match(r"^\d+\.\s", line))
+        if not is_block_start:
+            continue
+            
+        k = i - 1
+        while k >= 0 and result[k].strip() == "":
+            k -= 1
+        if k < 0:
+            continue
+            
+        prev_line = result[k].strip()
+        is_lead_in = (prev_line.endswith(":") or prev_line.endswith("as follows") or prev_line.endswith("as follows:")) and \
+                     not prev_line.startswith("#") and \
+                     not prev_line.startswith("//") and \
+                     not prev_line.startswith("/*") and \
+                     not prev_line.startswith("* ") and \
+                     not prev_line.startswith("- ") and \
+                     not prev_line.startswith("+ ") and \
+                     not re.match(r"^\d+\.\s", prev_line) and \
+                     not prev_line.startswith("]") and \
+                     not prev_line.endswith("]") and \
+                     not prev_line.startswith("}") and \
+                     not prev_line.endswith("{")
+                     
+        if not is_lead_in:
+            continue
+            
+        start_p = k
+        while start_p > 0:
+            prev_p = result[start_p - 1].strip()
+            if prev_p == "" or prev_p.startswith("#") or prev_p.startswith("```") or prev_p.startswith(">") or prev_p.startswith("-") or prev_p.startswith("*"):
+                break
+            if k - start_p >= 3:
+                break
+            start_p -= 1
+            
+        already_blocked = any("#block" in result[idx] or "note(" in result[idx] or "memo(" in result[idx] for idx in range(start_p, k + 1))
+        if not already_blocked:
+            result[start_p] = f"#block(sticky: true)[\n{result[start_p]}"
+            result[k] = f"{result[k]}\n]"
+            
+    return result
+
 def convert_md_to_typst(text):
     # Global cleanup
     # Normalize newlines
@@ -693,7 +741,8 @@ def convert_md_to_typst(text):
     if pending_chapter_title:
          new_lines.append(f"= {pending_chapter_title}")
 
-    return "\n".join(new_lines)
+    processed_lines = apply_sticky_lead_ins(new_lines)
+    return "\n".join(processed_lines)
 
 # ... (main loop starts below, no change needed there) ...
 # But we need to save the JSON after the loop!
