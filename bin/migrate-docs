@@ -153,16 +153,36 @@ def get_smart_eyebrow(text, title=None):
 def apply_sticky_lead_ins(lines):
     result = list(lines)
     n = len(result)
+    
+    in_code = False
+    is_inside_code = [False] * n
+    for i in range(n):
+        l = result[i].strip()
+        if l.startswith("```"):
+            if not in_code:
+                is_inside_code[i] = False
+                in_code = True
+            else:
+                is_inside_code[i] = True
+                in_code = False
+        else:
+            is_inside_code[i] = in_code
+
     for i in range(n):
         line = result[i].strip()
-        is_block_start = line.startswith("```") or line.startswith("#image(") or line.startswith("#figure(") or line.startswith("- ") or line.startswith("+ ") or bool(re.match(r"^\d+\.\s", line))
-        if not is_block_start:
+        if is_inside_code[i]:
+            continue
+            
+        is_opening_fence = line.startswith("```")
+        is_block_elem = line.startswith("#image(") or line.startswith("#figure(") or line.startswith("- ") or line.startswith("+ ") or bool(re.match(r"^\d+\.\s", line))
+        
+        if not (is_opening_fence or is_block_elem):
             continue
             
         k = i - 1
         while k >= 0 and result[k].strip() == "":
             k -= 1
-        if k < 0:
+        if k < 0 or is_inside_code[k]:
             continue
             
         prev_line = result[k].strip()
@@ -184,6 +204,8 @@ def apply_sticky_lead_ins(lines):
             
         start_p = k
         while start_p > 0:
+            if is_inside_code[start_p - 1]:
+                break
             prev_p = result[start_p - 1].strip()
             if prev_p == "" or prev_p.startswith("#") or prev_p.startswith("```") or prev_p.startswith(">") or prev_p.startswith("-") or prev_p.startswith("*"):
                 break
