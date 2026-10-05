@@ -39,6 +39,19 @@
   }
 }
 
+// Allow inline code (like long method names in margin notes) to break cleanly at punctuation
+#show raw.where(block: false): it => {
+  let chars = it.text.clusters()
+  let result = ()
+  for (i, c) in chars.enumerate() {
+    result.push(c)
+    if c in ("_", ":", ".", "(") and i < chars.len() - 1 {
+      result.push(sym.zws)
+    }
+  }
+  text(font: "IBM Plex Mono", size: 0.88em, result.join())
+}
+
 // Micro-typography polish
 #set text(hyphenate: true)
 #set list(tight: true)
