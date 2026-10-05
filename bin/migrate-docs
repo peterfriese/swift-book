@@ -187,7 +187,7 @@ def apply_sticky_lead_ins(lines):
             prev_p = result[start_p - 1].strip()
             if prev_p == "" or prev_p.startswith("#") or prev_p.startswith("```") or prev_p.startswith(">") or prev_p.startswith("-") or prev_p.startswith("*"):
                 break
-            if k - start_p >= 3:
+            if k - start_p >= 15:
                 break
             start_p -= 1
             
